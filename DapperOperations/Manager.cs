@@ -30,7 +30,7 @@ namespace DapperOperations
 
         internal static bool HasMappedProperties { get; set; } = false;
 
-        public static MappedEntity<TEntity>? GetEntity<TEntity>() where TEntity : class, new()
+        public static MappedEntity<TEntity>? Get<TEntity>() where TEntity : class, new()
         {
             var entity = _mapper.GetValueOrDefault(typeof(TEntity).GUID);
             if (entity == null)
@@ -40,7 +40,7 @@ namespace DapperOperations
             return (MappedEntity<TEntity>)entity;
         }
 
-        public static MappedEntity? GetEntity(Type model)
+        public static MappedEntity? Get(Type model)
         {
             var entity = _mapper.GetValueOrDefault(model.GUID);
             if (entity == null)
@@ -117,6 +117,7 @@ namespace DapperOperations
             else
             {
                 InitMap(value, entity);
+                _mapper.TryAdd(entity.GUID, value);
                 return value;
             }
         }
@@ -132,6 +133,7 @@ namespace DapperOperations
             else
             {
                 InitMap(value, typeof(TEntity));
+                _mapper.TryAdd(typeof(TEntity).GUID, value);
                 return value;
             }
         }

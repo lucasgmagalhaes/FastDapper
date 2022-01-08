@@ -41,6 +41,48 @@ namespace DapperOperations.Test
         }
 
         [Fact]
+        public void ShouldMapForGetOrMappMethod()
+        {
+            var mapper = Manager.GetOrAdd(typeof(User1));
+            AssertUser1(mapper);
+        }
+
+        [Fact]
+        public void ShouldMapForGetOrMappMethodGeneric()
+        {
+            var mapper = Manager.GetOrAdd<User1>();
+            AssertUser1(mapper);
+        }
+
+        [Fact]
+        public void ShouldReturnTrueForMappedEntity()
+        {
+            Manager.GetOrAdd<User1>();
+            Assert.True(Manager.IsEntityMapped(typeof(User1)));
+        }
+
+        [Fact]
+        public void ShouldReturnTrueForMappedEntityGeneric()
+        {
+            Manager.GetOrAdd<User1>();
+            Assert.True(Manager.IsEntityMapped<User1>());
+        }
+
+        [Fact]
+        public void ShouldGetEntity()
+        {
+            Manager.Map<User1>();
+            Assert.NotNull(Manager.Get<User1>());
+        }
+
+        [Fact]
+        public void ShouldGetEntityGeneric()
+        {
+            Manager.Map<User1>();
+            Assert.NotNull(Manager.Get(typeof(User1)));
+        }
+
+        [Fact]
         public void ShouldMapFromListOfType()
         {
             var mapper = Manager.Map(Assembly.GetExecutingAssembly()
