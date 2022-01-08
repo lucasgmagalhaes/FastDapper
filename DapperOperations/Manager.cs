@@ -50,57 +50,89 @@ namespace DapperOperations
             return entity;
         }
 
-        public static MappedEntity? Map(Type entity)
-        {
-            var value = new MappedEntity();
-            var added = _mapper.TryAdd(entity.GUID, value);
-            if (added)
-            {
-                return value;
-            }
-            return null;
-        }
-
         public static MappedEntity<TEntity>? Map<TEntity>() where TEntity : class, new()
         {
-            var mapper = new MappedEntity<TEntity>();
-            var added = _mapper.TryAdd(typeof(TEntity).GUID, mapper);
-
-            if (added)
+            if (IsEntityMapped(typeof(TEntity)))
             {
-                InitMap(mapper, typeof(TEntity));
+                _mapper.TryGetValue(typeof(TEntity).GUID, out var value);
+                return (MappedEntity<TEntity>?)value;
             }
+
+            var mapper = new MappedEntity<TEntity>();
+            InitMap(mapper, typeof(TEntity));
+            _mapper.TryAdd(typeof(TEntity).GUID, mapper);
             return mapper;
+        }
+
+        public static MappedEntity? Map(Type entity)
+        {
+            if (IsEntityMapped(entity))
+            {
+                _mapper.TryGetValue(entity.GUID, out var value);
+                return value;
+            }
+
+            var mapper = new MappedEntity();
+            InitMap(mapper, entity);
+            _mapper.TryAdd(entity.GUID, mapper);
+            return mapper;
+        }
+
+        public static List<MappedEntity?> Map(IEnumerable<Type> entities)
+        {
+            var mapeds = new List<MappedEntity?>();
+            foreach (var entity in entities)
+            {
+                mapeds.Add(Map(entity));
+            }
+            return mapeds;
+        }
+
+        public static List<MappedEntity?> Map(Assembly assembly, string namespaces)
+        {
+            var types = assembly.GetTypes().Where(a => a.Namespace == namespaces);
+            return Map(types);
+        }
+
+        public static List<MappedEntity?> MapFromAssemblyName(string fullName, string typesNameSpace)
+        {
+            var domainAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.Contains(fullName));
+            var models = domainAssembly?.GetTypes().Where(a => a.Namespace == typesNameSpace).ToList();
+
+            if (models != null)
+            {
+                return Map(models);
+            }
+            return Enumerable.Empty<MappedEntity?>().ToList();
         }
 
         public static MappedEntity? GetOrAdd(Type entity)
         {
             var value = new MappedEntity();
-            var mapper = _mapper.GetOrAdd(entity.GUID, value);
-            if (mapper != null)
+            if (IsEntityMapped(entity))
             {
-                InitMap(mapper, entity);
+                var mapper = _mapper.GetOrAdd(entity.GUID, value);
+                return mapper;
             }
-            return mapper;
+            else
+            {
+                InitMap(value, entity);
+                return value;
+            }
         }
 
-        public static MappedEntity? MapOrAdd<TEntity>() where TEntity : class, new()
+        public static MappedEntity? GetOrAdd<TEntity>() where TEntity : class, new()
         {
             var value = new MappedEntity();
-            var mapper = _mapper.GetOrAdd(typeof(TEntity).GUID, value);
-            if (mapper != null)
+            if (IsEntityMapped(typeof(TEntity)))
             {
-                InitMap(mapper, typeof(TEntity));
+                var mapper = _mapper.GetOrAdd(typeof(TEntity).GUID, value);
+                return mapper;
             }
-            return mapper;
-        }
-
-        public static void Map(Assembly assembly)
-        {
-            var types = assembly.GetTypes();
-            foreach (var type in types)
+            else
             {
-                InitMap(type);
+                InitMap(value, typeof(TEntity));
+                return value;
             }
         }
 
@@ -112,15 +144,6 @@ namespace DapperOperations
         public static bool IsEntityMapped(Type type)
         {
             return _mapper.Any(v => v.Key == type.GUID);
-        }
-
-        private static void InitMap(Type model)
-        {
-            var mapper = GetOrAdd(model);
-            if (mapper != null)
-            {
-                InitMap(mapper, model);
-            }
         }
 
         private static void InitMap(MappedEntity mapper, Type model)
