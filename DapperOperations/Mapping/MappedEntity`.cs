@@ -4,11 +4,12 @@
     {
         public Tuple<string, string>? KeyMap { get; set; }
         public Dictionary<string, string> ColumnsMap { get; set; }  
-        public string? TableName { get; set; }
+        public string TableName { get; set; }
         public string? SchemaName { get; set; }
 
         public MappedEntity()
         {
+            TableName = "";
             ColumnsMap = new Dictionary<string, string>();
         }
 
@@ -31,6 +32,15 @@
         {
             TableName = name;
             SchemaName = schema;
+        }
+
+        public string GetFormattedTableName()
+        {
+            if (string.IsNullOrEmpty(SchemaName))
+            {
+                return TableName;
+            }
+            return $"{SchemaName}.{TableName}";
         }
     }
 }
