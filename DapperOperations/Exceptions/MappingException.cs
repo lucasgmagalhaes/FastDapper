@@ -1,44 +1,44 @@
-﻿using System.Collections;
-using System.Reflection;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace DapperOperations.Exceptions
 {
+    /// <summary>
+    /// Represents an error for some mapping problem
+    /// </summary>
     [Serializable]
     public class MappingException : Exception
     {
+        /// <summary>
+        /// Initialize a new instance of <see cref="MappingException"/>
+        /// </summary>
         public MappingException()
         {
         }
 
+        /// <summary>
+        /// Initialize a new instance of <see cref="MappingException"/> with an error message
+        /// </summary>
+        /// <param name="message">Error message</param>
         public MappingException(string? message) : base(message)
         {
         }
 
+        /// <summary>
+        /// Initialize a new instance of <see cref="MappingException"/> with an error message and an inner exception
+        /// </summary>
+        /// <param name="message">Error message</param>
+        /// <param name="innerException">Inner exception</param>
         public MappingException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
 
+        /// <summary>
+        /// Initialize a new instance of <see cref="MappingException"/> with a serialization info and a context
+        /// </summary>
+        /// <param name="info">Serialization info</param>
+        /// <param name="context">Context</param>
         protected MappingException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-        }
-
-        public override bool Equals(object? obj)
-        {
-            return obj is MappingException exception &&
-                   EqualityComparer<IDictionary>.Default.Equals(Data, exception.Data) &&
-                   HelpLink == exception.HelpLink &&
-                   HResult == exception.HResult &&
-                   EqualityComparer<Exception?>.Default.Equals(InnerException, exception.InnerException) &&
-                   Message == exception.Message &&
-                   Source == exception.Source &&
-                   StackTrace == exception.StackTrace &&
-                   EqualityComparer<MethodBase?>.Default.Equals(TargetSite, exception.TargetSite);
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Data, HelpLink, HResult, InnerException, Message, Source, StackTrace, TargetSite);
         }
     }
 }

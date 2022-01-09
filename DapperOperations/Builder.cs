@@ -17,7 +17,7 @@ namespace DapperOperations
 
             if (mapper == null)
             {
-                throw new SQLBuildingException("Mapper not found for " + typeof(T).Name);
+                throw new SqlBuildingException("Mapper not found for " + typeof(T).Name);
             }
 
             string query = _cache.GetInsertQuery<T>();
@@ -38,7 +38,7 @@ namespace DapperOperations
 
             if (mapper == null)
             {
-                throw new SQLBuildingException("Mapper not found for " + typeof(T).Name);
+                throw new SqlBuildingException("Mapper not found for " + typeof(T).Name);
             }
 
             var cache = _cache.GetUpsertCache<T>();
@@ -154,7 +154,7 @@ namespace DapperOperations
 
             if (mapper == null)
             {
-                throw new SQLBuildingException("Mapper not found for " + typeof(T).Name);
+                throw new SqlBuildingException("Mapper not found for " + typeof(T).Name);
             }
 
             string query = _cache.GetUpdateQuery<T>();
