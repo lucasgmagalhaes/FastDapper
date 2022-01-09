@@ -9,13 +9,24 @@ using System.Reflection;
 
 namespace DapperOperations
 {
+    /// <summary>
+    /// Represents all configurations for <see cref="DapperOperation"/>
+    /// </summary>
     public static class DapperOperation
     {
+        /// <summary>
+        /// Gets the namming convention used to map each property to his
+        /// refered column
+        /// </summary>
         public static NameConvetion NameConvetion
         {
             get => _nameConvetion;
         }
 
+        /// <summary>
+        /// Gets or set the definition of <see cref="DapperOperation"/> must
+        /// throw an error if some entity be mapped more than once.
+        /// </summary>
         public static bool ThrowIfAlreadyMapped { get; set; }
 
         private static readonly ConcurrentDictionary<Guid, MappedEntity> _mapper = new();
@@ -23,6 +34,14 @@ namespace DapperOperations
 
         internal static bool HasMappedProperties { get; set; } = false;
 
+        /// <summary>
+        /// Set the namming convention for table and columns names. <see cref="NameConvetion"/>
+        /// </summary>
+        /// <param name="nameConvetion">The nameConvetion to be used</param>
+        /// <exception cref="MappingException">
+        /// Throws an error if the attempting to change 
+        /// the convetion after an entity be mapped
+        /// </exception>
         public static void SetNameConvention(NameConvetion nameConvetion)
         {
             if (HasMappedProperties)
@@ -33,9 +52,14 @@ namespace DapperOperations
             _nameConvetion = nameConvetion;
         }
 
+        /// <summary>
+        /// Get a specified mapped entity <typeparamref name="T"/> or null if the entity isn't mapped already
+        /// </summary>
+        /// <typeparam name="T">Entity mapped</typeparam>
+        /// <returns>The mapper of entity <typeparamref name="T"/> or null</returns>
         public static MappedEntity<T>? Get<T>() where T : class, new()
         {
-            var key = GetKeyForEntity(typeof(T));
+            var key = Utils.GetTypeKey<T>();
             var entity = _mapper.GetValueOrDefault(key);
             if (entity == null)
             {
@@ -44,9 +68,15 @@ namespace DapperOperations
             return (MappedEntity<T>)entity;
         }
 
+        /// <summary>
+        /// Get a no specified mapped entity or null if the entity isn't mapped
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         public static MappedEntity? Get(Type model)
         {
-            var entity = _mapper.GetValueOrDefault(model.GUID);
+            var key = Utils.GetTypeKey(model);
+            var entity = _mapper.GetValueOrDefault(key);
             if (entity == null)
             {
                 return null;
@@ -62,14 +92,14 @@ namespace DapperOperations
             }
 
             var mapper = new MappedEntity<T>();
-            var key = GetKeyForEntity(typeof(T));
+            var key = Utils.GetTypeKey<T>();
             _mapper.TryAdd(key, mapper);
             return mapper;
         }
 
         public static MappedEntity<T>? Map<T>() where T : class, new()
         {
-            var key = GetKeyForEntity(typeof(T));
+            var key = Utils.GetTypeKey<T>();
             if (IsEntityMapped(typeof(T)))
             {
                 ThrowErrorIfAlreadyMapped<T>();
@@ -85,7 +115,7 @@ namespace DapperOperations
 
         public static MappedEntity? Map(Type entity)
         {
-            var key = GetKeyForEntity(entity);
+            var key = Utils.GetTypeKey(entity);
             if (IsEntityMapped(entity))
             {
                 ThrowErrorIfAlreadyMapped(entity);
@@ -130,7 +160,7 @@ namespace DapperOperations
         public static MappedEntity? GetOrAdd(Type entity)
         {
             var value = new MappedEntity();
-            var key = GetKeyForEntity(entity);
+            var key = Utils.GetTypeKey(entity);
 
             if (IsEntityMapped(entity))
             {
@@ -149,7 +179,7 @@ namespace DapperOperations
         public static MappedEntity? GetOrAdd<T>() where T : class, new()
         {
             var value = new MappedEntity<T>();
-            var key = GetKeyForEntity(typeof(T));
+            var key = Utils.GetTypeKey<T>();
 
             if (IsEntityMapped(typeof(T)))
             {
@@ -228,11 +258,6 @@ namespace DapperOperations
                     mapper.Column(prop.Name, prop.Name.FormatByConvetion());
                 }
             }
-        }
-
-        private static Guid GetKeyForEntity(Type type)
-        {
-            return type.GUID;
         }
 
         private static void ThrowErrorIfAlreadyMapped<T>()

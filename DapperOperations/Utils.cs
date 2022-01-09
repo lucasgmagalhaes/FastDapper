@@ -44,6 +44,16 @@ namespace DapperOperations
             return new[] { (PropertyInfo)member.Member };
         }
 
+        public static Guid GetTypeKey(Type type)
+        {
+            return type.GUID;
+        }
+
+        public static Guid GetTypeKey<T>()
+        {
+            return GetTypeKey(typeof(T));
+        }
+
         private static void ThrowIfNotProperty(MemberInfo member, Expression expression)
         {
             if (member is not PropertyInfo)
@@ -51,5 +61,6 @@ namespace DapperOperations
                     "Expression '{0}' refers to a field, not a property.",
                     expression.ToString()));
         }
+
     }
 }

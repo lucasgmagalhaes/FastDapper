@@ -1,4 +1,6 @@
-﻿namespace DapperOperations.Mapping
+﻿using DapperOperations.Exceptions;
+
+namespace DapperOperations.Mapping
 {
     public class MappedEntity
     {
@@ -29,7 +31,7 @@
             TableName = name;
         }
 
-        public void Table(string name, string? schema)
+        public void Table(string name, string schema)
         {
             TableName = name;
             SchemaName = schema;
@@ -41,7 +43,7 @@
             {
                 if (string.IsNullOrEmpty(TableName))
                 {
-                    throw new Exception("Table name not informed");
+                    throw new MappingException("Table name not informed");
                 }
                 return TableName;
             }
