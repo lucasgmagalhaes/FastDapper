@@ -1,10 +1,13 @@
 ﻿using Dapper;
+using DapperOperations.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -66,68 +69,6 @@ namespace DapperOperations
                 }
             }
             return full;
-        }
-
-        private string BuildSQLStatement()
-        {
-            var builder = new StringBuilder($"INSERT INTO {_table}");
-
-            var properties = typeof(TEntity)
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.GetCustomAttribute<IgnoreAttribute>() == null && p.GetCustomAttribute<KeyAttribute>() == null)
-            .ToDictionary(y => y.Name, x => GetColumnNameFromProp(x));
-            var fields = string.Join(", ", properties.Select(x => $"\"{x.Value}\""));
-
-            builder.Append($"({fields}) VALUES ");
-
-            var values = new List<string>();
-            for (int i = 0; i < _entries.Count(); i++)
-            {
-                values.Add($"({string.Join(", ", properties.Select(x => $"@{x.Key}_{i}"))})");
-            }
-
-            builder.Append(string.Join(',', values));
-
-            builder.Append(" ON CONFLICT ");
-
-            var obj = _conflitctKeys.Compile().Invoke(_entries.First());
-
-            var propertiesConflict = obj.GetType().GetProperties()
-                .Select(o => o.Name).Select(name => properties.GetValueOrDefault(name));
-
-            builder.Append($"({string.Join(',', propertiesConflict)})");
-
-            if (_update)
-            {
-                builder.Append(" DO UPDATE ");
-                builder.Append($"SET ");
-
-                var onUpdateList = new List<string>();
-                foreach (var property in properties.Select(p => p.Value))
-                {
-                    onUpdateList.Add($"{property} = EXCLUDED.{property}");
-                }
-                builder.Append(string.Join(',', onUpdateList));
-            }
-
-            if (typeof(TEntity).GetProperty("Id") != null)
-            {
-                builder.Append(" RETURNING Id");
-            }
-
-            return builder.ToString();
-        }
-
-        private static string GetColumnNameFromProp(PropertyInfo prop)
-        {
-            var col = prop.GetCustomAttribute<ColumnAttribute>();
-
-            if (col != null)
-            {
-                return col.Name;
-            }
-
-            return prop.Name.ToSnakeCase();
         }
 
     }

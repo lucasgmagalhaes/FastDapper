@@ -37,7 +37,7 @@ namespace DapperOperations.Extensions
 
         public static string FormatByConvetion(this string input)
         {
-            return Manager.NameConvetion switch
+            return DapperOperation.NameConvetion switch
             {
                 NameConvetion.PascalCase => input.ToPascalCase(),
                 NameConvetion.SnakeCase => input.ToSnakeCase(),

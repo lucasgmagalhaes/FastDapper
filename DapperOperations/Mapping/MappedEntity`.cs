@@ -1,46 +1,59 @@
-﻿namespace DapperOperations.Mapping
+﻿using DapperOperations.Extensions;
+using System.Linq.Expressions;
+using System.Reflection;
+
+namespace DapperOperations.Mapping
 {
-    public class MappedEntity
+    public sealed class MappedEntity<TEntity> : MappedEntity where TEntity : class, new()
     {
-        public Tuple<string, string>? KeyMap { get; set; }
-        public Dictionary<string, string> ColumnsMap { get; set; }  
-        public string TableName { get; set; }
-        public string? SchemaName { get; set; }
-
-        public MappedEntity()
+        public void Column(Expression<Func<TEntity, object>> keyMapper)
         {
-            TableName = "";
-            ColumnsMap = new Dictionary<string, string>();
+            var property = GetPropertyInfo(keyMapper);
+            ColumnsMap.Add(property.Name, property.Name.FormatByConvetion());
         }
 
-        public void Key(string source, string destination)
+        public void Column(Expression<Func<TEntity, object>> keyMapper, string destinationName)
         {
-            KeyMap = new(source, destination);
+            var property = GetPropertyInfo(keyMapper);
+            ColumnsMap.Add(property.Name, destinationName.FormatByConvetion());
         }
 
-        public void Column(string propName, string columnDestination)
+        public void Key(Expression<Func<TEntity, object>> keyMapper)
         {
-            ColumnsMap.Add(propName, columnDestination);
+            var property = GetPropertyInfo(keyMapper);
+            KeyMap = new(property.Name, property.Name.FormatByConvetion());
         }
 
-        public void Table(string name)
+        public void Key(Expression<Func<TEntity, object>> keyMapper, string destinationName)
         {
-            TableName = name;
+            var property = GetPropertyInfo(keyMapper);
+            KeyMap = new(property.Name, destinationName.FormatByConvetion());
         }
 
-        public void Table(string name, string? schema)
+        private static PropertyInfo GetPropertyInfo<TProperty>(Expression<Func<TEntity, TProperty>> expression)
         {
-            TableName = name;
-            SchemaName = schema;
-        }
-
-        public string GetFormattedTableName()
-        {
-            if (string.IsNullOrEmpty(SchemaName))
+            Expression exp;
+            if (expression.Body is UnaryExpression unary)
             {
-                return TableName;
+                exp = unary.Operand;
             }
-            return $"{SchemaName}.{TableName}";
+            else
+            {
+                exp = expression.Body;
+            }
+
+            if (exp is not MemberExpression member)
+            {
+                throw new ArgumentException(string.Format("Expression '{0}' refers to a method, not a property.",
+                expression.ToString()));
+            }
+
+            if (member.Member is not PropertyInfo propInfo)
+                throw new ArgumentException(string.Format(
+                    "Expression '{0}' refers to a field, not a property.",
+                    expression.ToString()));
+
+            return propInfo;
         }
     }
 }

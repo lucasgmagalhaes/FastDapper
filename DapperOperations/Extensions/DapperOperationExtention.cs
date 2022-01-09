@@ -10,6 +10,11 @@ namespace DapperOperations.Extensions
             return con.Execute(Builder.BuildInsertStatement<T>(), entity);
         }
 
+        public static Task<int> InsertAsync<T>(this IDbConnection con, T entity) where T : class, new()
+        {
+            return con.ExecuteAsync(Builder.BuildInsertStatement<T>(), entity);
+        }
+
         public static int Update<T>(this IDbConnection con, T entity) where T : class, new()
         {
             return con.Execute(Builder.BuildUpdateStatement<T>(), entity);

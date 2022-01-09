@@ -71,7 +71,7 @@ namespace DapperOperations
 
         public static string BuildInsertStatement<T>() where T : class, new()
         {
-            var mapper = Manager.Get<T>();
+            var mapper = DapperOperation.Get<T>();
 
             if (mapper == null)
             {
@@ -92,7 +92,7 @@ namespace DapperOperations
 
         public static string BuildBulkInsertStatement<T>(int count) where T : class, new()
         {
-            var mapper = Manager.Get<T>();
+            var mapper = DapperOperation.Get<T>();
 
             if (mapper == null)
             {
@@ -112,7 +112,7 @@ namespace DapperOperations
 
         public static string BuildUpdateStatement<T>() where T : class, new()
         {
-            var mapper = Manager.Get<T>();
+            var mapper = DapperOperation.Get<T>();
 
             if (mapper == null)
             {
