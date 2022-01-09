@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace DapperOperations.Mapping
 {
-    public sealed class MappedEntity<TEntity> : MappedEntity where TEntity : class, new()
+    public class MappedEntity<TEntity> : MappedEntity where TEntity : class, new()
     {
         public void Column(Expression<Func<TEntity, object>> keyMapper)
         {

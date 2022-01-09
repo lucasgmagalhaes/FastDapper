@@ -14,15 +14,6 @@ namespace DapperOperations
         public static NameConvetion NameConvetion
         {
             get => _nameConvetion;
-            set
-            {
-                if (HasMappedProperties)
-                {
-                    throw new MappingException("Can not change namming convention after map properties");
-                }
-
-                _nameConvetion = value;
-            }
         }
 
         private static readonly ConcurrentDictionary<Guid, MappedEntity> _mapper = new();
@@ -30,9 +21,20 @@ namespace DapperOperations
 
         internal static bool HasMappedProperties { get; set; } = false;
 
+        public static void SetNameConvention(NameConvetion nameConvetion)
+        {
+            if (HasMappedProperties)
+            {
+                throw new MappingException("Can not change namming convention after map properties");
+            }
+
+            _nameConvetion = nameConvetion;
+        }
+
         public static MappedEntity<TEntity>? Get<TEntity>() where TEntity : class, new()
         {
-            var entity = _mapper.GetValueOrDefault(typeof(TEntity).GUID);
+            var key = GetKeyForEntity(typeof(TEntity));
+            var entity = _mapper.GetValueOrDefault(key);
             if (entity == null)
             {
                 return null;
@@ -53,35 +55,38 @@ namespace DapperOperations
         public static MappedEntity<TEntity> CreateEmptyMap<TEntity>() where TEntity : class, new()
         {
             var mapper = new MappedEntity<TEntity>();
-            _mapper.TryAdd(typeof(TEntity).GUID, mapper);
+            var key = GetKeyForEntity(typeof(TEntity));
+            _mapper.TryAdd(key, mapper);
             return mapper;
         }
 
         public static MappedEntity<TEntity>? Map<TEntity>() where TEntity : class, new()
         {
+            var key = GetKeyForEntity(typeof(TEntity));
             if (IsEntityMapped(typeof(TEntity)))
             {
-                _mapper.TryGetValue(typeof(TEntity).GUID, out var value);
+                _mapper.TryGetValue(key, out var value);
                 return (MappedEntity<TEntity>?)value;
             }
 
             var mapper = new MappedEntity<TEntity>();
             InitMap(mapper, typeof(TEntity));
-            _mapper.TryAdd(typeof(TEntity).GUID, mapper);
+            _mapper.TryAdd(key, mapper);
             return mapper;
         }
 
         public static MappedEntity? Map(Type entity)
         {
+            var key = GetKeyForEntity(entity);
             if (IsEntityMapped(entity))
             {
-                _mapper.TryGetValue(entity.GUID, out var value);
+                _mapper.TryGetValue(key, out var value);
                 return value;
             }
 
             var mapper = new MappedEntity();
             InitMap(mapper, entity);
-            _mapper.TryAdd(entity.GUID, mapper);
+            _mapper.TryAdd(key, mapper);
             return mapper;
         }
 
@@ -116,31 +121,35 @@ namespace DapperOperations
         public static MappedEntity? GetOrAdd(Type entity)
         {
             var value = new MappedEntity();
+            var key = GetKeyForEntity(entity);
+
             if (IsEntityMapped(entity))
             {
-                var mapper = _mapper.GetOrAdd(entity.GUID, value);
+                var mapper = _mapper.GetOrAdd(key, value);
                 return mapper;
             }
             else
             {
                 InitMap(value, entity);
-                _mapper.TryAdd(entity.GUID, value);
+                _mapper.TryAdd(key, value);
                 return value;
             }
         }
 
         public static MappedEntity? GetOrAdd<TEntity>() where TEntity : class, new()
         {
-            var value = new MappedEntity();
+            var value = new MappedEntity<TEntity>();
+            var key = GetKeyForEntity(typeof(TEntity));
+
             if (IsEntityMapped(typeof(TEntity)))
             {
-                var mapper = _mapper.GetOrAdd(typeof(TEntity).GUID, value);
+                var mapper = _mapper.GetOrAdd(key, value);
                 return mapper;
             }
             else
             {
                 InitMap(value, typeof(TEntity));
-                _mapper.TryAdd(typeof(TEntity).GUID, value);
+                _mapper.TryAdd(key, value);
                 return value;
             }
         }
@@ -209,6 +218,11 @@ namespace DapperOperations
                     mapper.Column(prop.Name, prop.Name.FormatByConvetion());
                 }
             }
+        }
+
+        private static Guid GetKeyForEntity(Type type)
+        {
+            return type.GUID;
         }
     }
 }
