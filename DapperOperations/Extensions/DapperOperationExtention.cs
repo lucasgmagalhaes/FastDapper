@@ -25,16 +25,9 @@ namespace DapperOperations.Extensions
             return con.ExecuteAsync(Builder.BuildUpdateStatement<T>(), entity);
         }
 
-        public static int BulkInsert<T>(this IDbConnection con, IEnumerable<T> entities) where T : class, new()
+        public static UpsertBuilder<T> Upsert<T>(this IDbConnection con, IEnumerable<T> entities) where T : class, new()
         {
-            var array = entities.ToArray();
-            return con.Execute(Builder.BuildBulkInsertStatement<T>(array.Length), Builder.UnifyEntities(array));
-        }
-
-        public static Task<int> BulkInsertAsync<T>(this IDbConnection con, IEnumerable<T> entities) where T : class, new()
-        {
-            var array = entities.ToArray();
-            return con.ExecuteAsync(Builder.BuildBulkInsertStatement<T>(array.Length), Builder.UnifyEntities(array));
+            return new UpsertBuilder<T>(con, entities);
         }
     }
 }

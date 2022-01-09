@@ -21,13 +21,13 @@ namespace DapperOperations.Mapping
         public void Key(Expression<Func<TEntity, object>> keyMapper)
         {
             var property = GetPropertyInfo(keyMapper);
-            KeyMap = new(property.Name, property.Name.FormatByConvetion());
+            KeyMap.Add(property.Name, property.Name.FormatByConvetion());
         }
 
         public void Key(Expression<Func<TEntity, object>> keyMapper, string destinationName)
         {
             var property = GetPropertyInfo(keyMapper);
-            KeyMap = new(property.Name, destinationName.FormatByConvetion());
+            KeyMap.Add(property.Name, destinationName.FormatByConvetion());
         }
 
         private static PropertyInfo GetPropertyInfo<TProperty>(Expression<Func<TEntity, TProperty>> expression)

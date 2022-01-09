@@ -32,5 +32,14 @@ namespace DapperOperations.Test
             DapperOperation.Map<User1>();
             Assert.NotNull(DapperOperation.Get(typeof(User1)));
         }
+
+        [Fact]
+        public void ShouldMapWithDifferentAproats()
+        {
+            DapperOperation.Map<User1>();
+            DapperOperation.Map(typeof(User1));
+            var val = DapperOperation.Get(typeof(User1));
+            Assert.NotNull(val);
+        }
     }
 }

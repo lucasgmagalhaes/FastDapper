@@ -2,7 +2,7 @@
 {
     public class MappedEntity
     {
-        internal Tuple<string, string>? KeyMap { get; set; }
+        internal Dictionary<string, string> KeyMap { get; set; }
         internal Dictionary<string, string> ColumnsMap { get; set; }
         internal string TableName { get; set; }
         internal string? SchemaName { get; set; }
@@ -11,11 +11,12 @@
         {
             TableName = "";
             ColumnsMap = new Dictionary<string, string>();
+            KeyMap = new Dictionary<string, string>();
         }
 
         public void Key(string source, string destination)
         {
-            KeyMap = new(source, destination);
+            KeyMap.Add(source, destination);
         }
 
         public void Column(string propName, string columnDestination)
