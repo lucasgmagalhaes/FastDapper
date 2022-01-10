@@ -3,21 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DapperOperations", "DapperOperations.csproj", "{7EEA13C5-0538-422F-BBD5-E8C17E702C4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DapperOperations", "DapperOperations\DapperOperations.csproj", "{7EEA13C5-0538-422F-BBD5-E8C17E702C4F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{401FE0A1-B78E-44CA-A544-35BAE5570ABB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DapperOperations.Test", "DapperOperations.Test\DapperOperations.Test.csproj", "{EAB7914C-57B3-4077-AFF8-B0B9CEE9C9B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "Benchmark\Benchmark.csproj", "{8C976C0B-41F1-4888-803B-34FC900FAC2A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark.Caching", "Benchmark.Caching\Benchmark.Caching.csproj", "{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{750AE4FA-3FBE-41EA-B8F8-B9911A2781F2}"
 	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-		..\.gitignore = ..\.gitignore
-		.vsconfig = .vsconfig
-		..\nuget.config = ..\nuget.config
+		.gitignore = .gitignore
+		generatePngs.bat = generatePngs.bat
+		LICENSE = LICENSE
+		nuget.config = nuget.config
+		package.bat = package.bat
+		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DapperOperations.Test", "..\DapperOperations.Test\DapperOperations.Test.csproj", "{EAB7914C-57B3-4077-AFF8-B0B9CEE9C9B9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "..\Benchmark\Benchmark.csproj", "{8C976C0B-41F1-4888-803B-34FC900FAC2A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark.Caching", "..\Benchmark.Caching\Benchmark.Caching.csproj", "{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
