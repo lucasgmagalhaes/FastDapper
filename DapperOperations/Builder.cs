@@ -32,7 +32,7 @@ namespace DapperOperations
             return query;
         }
 
-        public static string BuildUpsertStatement<T>(int count, bool update, Expression<Func<T, object>>? conflictKeys = null) where T : class, new()
+        public static string BuildUpsertStatement<T>(int count, bool update, Expression<Func<T, object>>? conflictKeys = null, bool useCache = true) where T : class, new()
         {
             var mapper = DapperOperation.Get<T>();
 
@@ -43,7 +43,7 @@ namespace DapperOperations
 
             var cache = _cache.GetUpsertCache<T>();
 
-            if (cache is not null)
+            if (cache is not null && useCache)
             {
                 return BuildFromCache(count, update, conflictKeys, mapper, cache);
             }
@@ -70,7 +70,10 @@ namespace DapperOperations
                 builder.Append(" DO NOTHING ");
             }
 
-            _cache.AddUpsertCache<T>(cache);
+            if (useCache)
+            {
+                _cache.AddUpsertCache<T>(cache);
+            }
 
             return builder.ToString();
         }
@@ -118,14 +121,14 @@ namespace DapperOperations
             }
 
             var conflict = $"({string.Join(',', mappedConflictKeys)})";
-            cache.Conflicts.Add(conflictKeys.Body, conflict);
+            cache.Conflicts.Add(conflictKeys.Body.Type.GUID, conflict);
             return conflict;
         }
 
         private static string BuildFromCache<T>(
             int count,
             bool update,
-            Expression<Func<T, object>>? conflictKeys,
+            Expression<Func<T, object>> conflictKeys,
             [NotNull] MappedEntity<T> mapper,
             [NotNull] UpsertCache cache) where T : class, new()
         {
@@ -133,8 +136,8 @@ namespace DapperOperations
 
             if (update)
             {
-                var conflictCache = cache.Conflicts.FirstOrDefault(c => IsExpressionEqual(c.Key, conflictKeys));
-                queryBuilder.Append(conflictCache.Value);
+                var conflictCache = cache.Conflicts[conflictKeys.Body.Type.GUID];
+                queryBuilder.Append(conflictCache);
 
                 queryBuilder.Append(" DO UPDATE ");
                 queryBuilder.Append($"SET ");

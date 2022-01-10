@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DapperOperations.Test", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "..\Benchmark\Benchmark.csproj", "{8C976C0B-41F1-4888-803B-34FC900FAC2A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark.Caching", "..\Benchmark.Caching\Benchmark.Caching.csproj", "{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{8C976C0B-41F1-4888-803B-34FC900FAC2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C976C0B-41F1-4888-803B-34FC900FAC2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C976C0B-41F1-4888-803B-34FC900FAC2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,6 +2,7 @@
 using DapperOperations.Exceptions;
 using DapperOperations.Extensions;
 using DapperOperations.Mapping;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -29,7 +30,7 @@ namespace DapperOperations
         /// </summary>
         public static bool ThrowIfAlreadyMapped { get; set; }
 
-        private static readonly ConcurrentDictionary<Guid, MappedEntity> _mapper = new();
+        private static readonly Hashtable _mapper = new();
         private static NameConvetion _nameConvetion = NameConvetion.CamelCase;
 
         internal static bool HasMappedProperties { get; set; } = false;
@@ -60,7 +61,7 @@ namespace DapperOperations
         public static MappedEntity<T>? Get<T>() where T : class, new()
         {
             var key = Utils.GetTypeKey<T>();
-            var entity = _mapper.GetValueOrDefault(key);
+            var entity = _mapper[key];
             if (entity == null)
             {
                 return null;
@@ -76,12 +77,12 @@ namespace DapperOperations
         public static MappedEntity? Get(Type model)
         {
             var key = Utils.GetTypeKey(model);
-            var entity = _mapper.GetValueOrDefault(key);
+            var entity = _mapper[key];
             if (entity == null)
             {
                 return null;
             }
-            return entity;
+            return (MappedEntity)entity;
         }
 
         public static MappedEntity<T> CreateEmptyMap<T>() where T : class, new()
@@ -93,7 +94,7 @@ namespace DapperOperations
 
             var mapper = new MappedEntity<T>();
             var key = Utils.GetTypeKey<T>();
-            _mapper.TryAdd(key, mapper);
+            _mapper.Add(key, mapper);
             return mapper;
         }
 
@@ -103,13 +104,12 @@ namespace DapperOperations
             if (IsEntityMapped(typeof(T)))
             {
                 ThrowErrorIfAlreadyMapped<T>();
-                _mapper.TryGetValue(key, out var value);
-                return (MappedEntity<T>?)value;
+                return (MappedEntity<T>?)_mapper[key];
             }
 
             var mapper = new MappedEntity<T>();
             InitMap(mapper, typeof(T));
-            _mapper.TryAdd(key, mapper);
+            _mapper.Add(key, mapper);
             return mapper;
         }
 
@@ -119,13 +119,12 @@ namespace DapperOperations
             if (IsEntityMapped(entity))
             {
                 ThrowErrorIfAlreadyMapped(entity);
-                _mapper.TryGetValue(key, out var value);
-                return value;
+                return (MappedEntity?)_mapper[key];
             }
 
             var mapper = new MappedEntity();
             InitMap(mapper, entity);
-            _mapper.TryAdd(key, mapper);
+            _mapper.Add(key, mapper);
             return mapper;
         }
 
@@ -165,13 +164,13 @@ namespace DapperOperations
             if (IsEntityMapped(entity))
             {
                 ThrowErrorIfAlreadyMapped(entity);
-                var mapper = _mapper.GetOrAdd(key, value);
-                return mapper;
+                _mapper.Add(key, value);
+                return value;
             }
             else
             {
                 InitMap(value, entity);
-                _mapper.TryAdd(key, value);
+                _mapper.Add(key, value);
                 return value;
             }
         }
@@ -183,25 +182,25 @@ namespace DapperOperations
 
             if (IsEntityMapped(typeof(T)))
             {
-                var mapper = _mapper.GetOrAdd(key, value);
-                return mapper;
+                _mapper.Add(key, value);
+                return value;
             }
             else
             {
                 InitMap(value, typeof(T));
-                _mapper.TryAdd(key, value);
+                _mapper.Add(key, value);
                 return value;
             }
         }
 
         public static bool IsEntityMapped<T>() where T : class, new()
         {
-            return _mapper.Any(v => v.Key == typeof(T).GUID);
+            return _mapper.ContainsKey(typeof(T).GUID);
         }
 
         public static bool IsEntityMapped(Type type)
         {
-            return _mapper.Any(v => v.Key == type.GUID);
+            return _mapper.ContainsKey(type.GUID);
         }
 
         private static void InitMap(MappedEntity mapper, Type model)
