@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using DapperOperations.Exceptions;
 using System.Data;
 using System.Dynamic;
 using System.Linq.Expressions;
@@ -54,9 +55,19 @@ namespace DapperOperations
         /// <returns>The task operation</returns>
         public async Task RunAsync()
         {
-            var sql = Builder.BuildUpsertStatement(_entries.Count(), _update, _conflitctKeys);
+            var query = Builder.BuildUpsertStatement(_entries.Length, _update, _conflitctKeys);
             var obj = BuildFullObject(_entries);
-            var ids = (await _con.QueryAsync<object>(sql, obj)).ToArray();
+            object[] ids;
+
+            try
+            {
+                ids = (await _con.QueryAsync<object>(query, obj)).ToArray();
+            }
+            catch (Exception ex)
+            {
+                throw new QueryException($"Error running query: {query}. See inner exception for detail", ex);
+            }
+
             UpdateKeyValues(ids);
         }
 
@@ -65,9 +76,17 @@ namespace DapperOperations
         /// </summary>
         public void Run()
         {
-            var sql = Builder.BuildUpsertStatement(_entries.Count(), _update, _conflitctKeys);
+            var query = Builder.BuildUpsertStatement(_entries.Length, _update, _conflitctKeys);
             var obj = BuildFullObject(_entries);
-            var ids = _con.Query<object>(sql, obj).ToArray();
+            object[] ids;
+            try
+            {
+                ids = _con.Query<object>(query, obj).ToArray();
+            }
+            catch (Exception ex)
+            {
+                throw new QueryException($"Error running query: {query}. See inner exception for detail", ex);
+            }
             UpdateKeyValues(ids);
         }
 

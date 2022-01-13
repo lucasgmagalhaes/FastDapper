@@ -1,16 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Concurrent;
-
-namespace DapperOperations
+﻿namespace DapperOperations
 {
     internal class BuilderCache
     {
-        private readonly Hashtable _cache = new ();
+        private readonly Dictionary<Guid, EntityQuery> _cache = new();
 
         public string AddInsertQuery<T>(string queryInsert)
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = (EntityQuery?)_cache[key];
+            var query = _cache[key];
             if (query == null)
             {
                 _cache.Add(key, new EntityQuery { Insert = queryInsert });
@@ -23,7 +20,7 @@ namespace DapperOperations
         public string GetInsertQuery<T>()
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = (EntityQuery?)_cache[key];
+            var query = _cache[key];
             if (query == null)
             {
                 return "";
@@ -34,7 +31,7 @@ namespace DapperOperations
         public string AddUpdateQuery<T>(string queryUpdate)
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = (EntityQuery?)_cache[key];
+            var query = _cache[key];
             if (query == null)
             {
                 _cache.Add(key, new EntityQuery { Update = queryUpdate });
@@ -47,7 +44,7 @@ namespace DapperOperations
         public string GetUpdateQuery<T>()
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = (EntityQuery?)_cache[key];
+            var query = _cache[key];
             if (query == null)
             {
                 return "";
@@ -58,7 +55,7 @@ namespace DapperOperations
         public UpsertCache AddUpsertCache<T>(UpsertCache cache)
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = (EntityQuery?)_cache[key];
+            var query = _cache[key];
             if (query == null)
             {
                 _cache.Add(key, new EntityQuery { Upsert = cache });
@@ -71,7 +68,7 @@ namespace DapperOperations
         public UpsertCache GetUpsertCache<T>()
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = (EntityQuery?)_cache[key];
+            var query = _cache[key];
             if (query == null)
             {
                 return null;

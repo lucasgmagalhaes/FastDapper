@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
 
 namespace DapperOperations.Exceptions
 {
@@ -6,6 +7,7 @@ namespace DapperOperations.Exceptions
     /// Represents an error for any build process problem that may occour in sql building
     /// </summary>
     [Serializable]
+    [ExcludeFromCodeCoverage]
     public class SqlBuildingException : Exception
     {
         /// <summary>

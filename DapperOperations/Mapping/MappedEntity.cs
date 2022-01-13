@@ -1,7 +1,13 @@
 ﻿using DapperOperations.Exceptions;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DapperOperations.Mapping
 {
+    /// <summary>
+    /// Defines a not typed entity mapping.
+    /// For a typed mapping, uses: <see cref="MappedEntity{TEntity}"/>
+    /// </summary>
     public class MappedEntity
     {
         internal Dictionary<string, string> KeyMap { get; set; }
@@ -9,6 +15,9 @@ namespace DapperOperations.Mapping
         internal string TableName { get; set; }
         internal string? SchemaName { get; set; }
 
+        /// <summary>
+        /// Initialize the entity mappings
+        /// </summary>
         public MappedEntity()
         {
             TableName = "";
@@ -16,28 +25,66 @@ namespace DapperOperations.Mapping
             KeyMap = new Dictionary<string, string>();
         }
 
-        public void Key(string source, string destination)
+        /// <summary>
+        /// Maps the primary key of the entity.
+        /// </summary>
+        /// <param name="property">Object's property with the primery key</param>
+        /// <param name="column">Column in database. (This operation do not apply the naming specification</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="property"/> or <paramref name="column"/> be null or empty</exception>
+        public void PrimaryKey([NotNull] string property, [NotNull] string column)
         {
-            KeyMap.Add(source, destination);
+            if (string.IsNullOrEmpty(property))
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
+            if (string.IsNullOrEmpty(column))
+            {
+                throw new ArgumentNullException(nameof(column));
+            }
+
+            KeyMap.Add(property, column);
         }
 
-        public void Column(string propName, string columnDestination)
+        /// <summary>
+        /// Maps a propety of an entity into it's referenced column in database.      
+        /// </summary>
+        /// <param name="property">Entity's property</param>
+        /// <param name="column">Entity's table column</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="property"/> or <paramref name="column"/> be null or empty</exception>
+        public void Column([NotNull] string property, [NotNull] string column)
         {
-            ColumnsMap.Add(propName, columnDestination);
+            if (string.IsNullOrEmpty(property))
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
+            if (string.IsNullOrEmpty(column))
+            {
+                throw new ArgumentNullException(nameof(column));
+            }
+
+            ColumnsMap.Add(property, column);
         }
 
-        public void Table(string name)
+        /// <summary>
+        /// Maps an entity's table name
+        /// </summary>
+        /// <param name="name">Name of the table</param>
+        /// <param name="schema">Schame of the table</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="name"/> is null or empty</exception>
+        public void Table([NotNull] string name, string? schema = null)
         {
-            TableName = name;
-        }
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
 
-        public void Table(string name, string schema)
-        {
             TableName = name;
             SchemaName = schema;
         }
 
-        public string GetFormattedTableName()
+        internal string GetFormattedTableName()
         {
             if (string.IsNullOrEmpty(SchemaName))
             {

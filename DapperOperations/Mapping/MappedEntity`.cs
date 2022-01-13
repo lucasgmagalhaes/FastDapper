@@ -1,30 +1,67 @@
 ﻿using DapperOperations.Extensions;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace DapperOperations.Mapping
 {
+    /// <summary>
+    /// Defines a typed entity mapper
+    /// For a non typed mapping, uses: <see cref="MappedEntity"/>
+    /// </summary>
+    /// <typeparam name="TEntity">Entity to be mapped</typeparam>
     public class MappedEntity<TEntity> : MappedEntity where TEntity : class, new()
     {
-        public void Column(Expression<Func<TEntity, object>> keyMapper)
+        /// <summary>
+        /// Manually maps a property of <typeparamref name="TEntity"/>
+        /// 
+        /// <br></br>
+        /// 
+        /// For the column name, <see cref="DapperOperation"/> uses the <see cref="DapperOperation.NameConvetion"/> to format
+        /// the name.
+        /// 
+        /// </summary>
+        /// <param name="keyMapper">Property of <typeparamref name="TEntity"/> to be mapped</param>
+        public void Column([NotNull] Expression<Func<TEntity, object>> keyMapper)
         {
             var property = GetPropertyInfo(keyMapper);
             ColumnsMap.Add(property.Name, property.Name.FormatByConvetion());
         }
 
+        /// <summary>
+        /// Manually maps a property of <typeparamref name="TEntity"/> with a column name
+        /// defined in <paramref name="destinationName"/>
+        /// </summary>
+        /// <param name="keyMapper">Property of <typeparamref name="TEntity"/> to be mapped</param>
+        /// <param name="destinationName">Column that <paramref name="keyMapper"/> refers to</param>
         public void Column(Expression<Func<TEntity, object>> keyMapper, string destinationName)
         {
             var property = GetPropertyInfo(keyMapper);
             ColumnsMap.Add(property.Name, destinationName.FormatByConvetion());
         }
 
-        public void Key(Expression<Func<TEntity, object>> keyMapper)
+        /// <summary>
+        /// Defines the primary key of <typeparamref name="TEntity"/>
+        /// 
+        /// <br></br>
+        /// 
+        /// For the column name, <see cref="DapperOperation"/> uses the <see cref="DapperOperation.NameConvetion"/> to format
+        /// the name.
+        /// </summary>
+        /// <param name="keyMapper">Primary key property</param>
+        public void PrimaryKey(Expression<Func<TEntity, object>> keyMapper)
         {
             var property = GetPropertyInfo(keyMapper);
             KeyMap.Add(property.Name, property.Name.FormatByConvetion());
         }
 
-        public void Key(Expression<Func<TEntity, object>> keyMapper, string destinationName)
+        /// <summary>
+        /// Defines the primary key of <typeparamref name="TEntity"/> with a column name
+        /// defined in <paramref name="destinationName"/>
+        /// </summary>
+        /// <param name="keyMapper">Property of <typeparamref name="TEntity"/> to be mapped</param>
+        /// <param name="destinationName">Column that <paramref name="keyMapper"/> refers to</param>
+        public void PrimaryKey(Expression<Func<TEntity, object>> keyMapper, string destinationName)
         {
             var property = GetPropertyInfo(keyMapper);
             KeyMap.Add(property.Name, destinationName.FormatByConvetion());

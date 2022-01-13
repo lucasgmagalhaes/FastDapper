@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using DapperOperations.Exceptions;
 using System.Data;
 
 namespace DapperOperations.Extensions
@@ -30,7 +31,15 @@ namespace DapperOperations.Extensions
         /// <returns>The number of Rows affected"/></returns>
         public static int Insert<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
-            return con.Execute(Builder.BuildInsertStatement<T>(), entity, transaction, commandTimeout);
+            var query = Builder.BuildInsertStatement<T>();
+            try
+            {
+                return con.Execute(query, entity, transaction, commandTimeout);
+            }
+            catch (Exception ex)
+            {
+                throw BuildExecutionException(query, ex);
+            }
         }
 
         /// <summary>
@@ -53,9 +62,18 @@ namespace DapperOperations.Extensions
         /// <param name="transaction">The transaction to use for this query.</param>
         /// <param name="commandTimeout">Number of seconds before command execution timeout.</param>
         /// <returns>The number of Rows affected"/></returns>
-        public static Task<int> InsertAsync<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task<int> InsertAsync<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
-            return con.ExecuteAsync(Builder.BuildInsertStatement<T>(), entity, transaction, commandTimeout);
+            var query = Builder.BuildInsertStatement<T>();
+            try
+            {
+                return await con.ExecuteAsync(query, entity, transaction, commandTimeout);
+            }
+            catch (Exception ex)
+            {
+                throw BuildExecutionException(query, ex);
+            }
+           
         }
 
         /// <summary>
@@ -80,7 +98,15 @@ namespace DapperOperations.Extensions
         /// <returns>The number of Rows affected"/></returns>
         public static int Update<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
-            return con.Execute(Builder.BuildUpdateStatement<T>(), entity, transaction, commandTimeout);
+            var query = Builder.BuildUpdateStatement<T>();
+            try
+            {
+                return con.Execute(query, entity, transaction, commandTimeout);
+            }
+            catch (Exception ex)
+            {
+                throw BuildExecutionException(query, ex);
+            }
         }
 
         /// <summary>
@@ -103,9 +129,17 @@ namespace DapperOperations.Extensions
         /// <param name="transaction">The transaction to use for this query.</param>
         /// <param name="commandTimeout">Number of seconds before command execution timeout.</param>
         /// <returns>The number of Rows affected"/></returns>
-        public static Task<int> UpdateAsync<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task<int> UpdateAsync<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
-            return con.ExecuteAsync(Builder.BuildUpdateStatement<T>(), entity, transaction, commandTimeout);
+            var query = Builder.BuildUpdateStatement<T>();
+            try
+            {
+                return await con.ExecuteAsync(query, entity, transaction, commandTimeout).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw BuildExecutionException(query, ex);
+            }
         }
 
         /// <summary>
@@ -118,6 +152,11 @@ namespace DapperOperations.Extensions
         public static UpsertBuilder<T> Upsert<T>(this IDbConnection con, IEnumerable<T> entities) where T : class, new()
         {
             return new UpsertBuilder<T>(con, entities);
+        }
+
+        private static QueryException BuildExecutionException(string query, Exception ex)
+        {
+            return new QueryException($"Error running query: {query}. See inner exception for detail", ex);
         }
     }
 }

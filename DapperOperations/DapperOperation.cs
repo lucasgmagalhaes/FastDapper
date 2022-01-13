@@ -2,8 +2,6 @@
 using DapperOperations.Exceptions;
 using DapperOperations.Extensions;
 using DapperOperations.Mapping;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
@@ -19,10 +17,7 @@ namespace DapperOperations
         /// Gets the namming convention used to map each property to his
         /// refered column
         /// </summary>
-        public static NameConvetion NameConvetion
-        {
-            get => _nameConvetion;
-        }
+        public static NameConvetion NameConvetion => _nameConvetion;
 
         /// <summary>
         /// Gets or set the definition of <see cref="DapperOperation"/> must
@@ -30,7 +25,7 @@ namespace DapperOperations
         /// </summary>
         public static bool ThrowIfAlreadyMapped { get; set; }
 
-        private static readonly Hashtable _mapper = new();
+        private static readonly Dictionary<Guid, MappedEntity> _mapper = new();
         private static NameConvetion _nameConvetion = NameConvetion.CamelCase;
 
         internal static bool HasMappedProperties { get; set; } = false;
@@ -82,9 +77,15 @@ namespace DapperOperations
             {
                 return null;
             }
-            return (MappedEntity)entity;
+            return entity;
         }
 
+        /// <summary>
+        /// Instantiate an empty mapper without for a given type <typeparamref name="T"/>
+        /// </summary>
+        /// <typeparam name="T">Entity to be mapped</typeparam>
+        /// <returns>The mapper of the entity</returns>
+        /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
         public static MappedEntity<T> CreateEmptyMap<T>() where T : class, new()
         {
             if (IsEntityMapped(typeof(T)) && ThrowIfAlreadyMapped)
@@ -98,6 +99,12 @@ namespace DapperOperations
             return mapper;
         }
 
+        /// <summary>
+        /// Maps an entity <typeparamref name="T"/>
+        /// </summary>
+        /// <typeparam name="T">Entity to be mapped</typeparam>
+        /// <returns>The mapper built</returns>
+        /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
         public static MappedEntity<T>? Map<T>() where T : class, new()
         {
             var key = Utils.GetTypeKey<T>();
@@ -112,14 +119,19 @@ namespace DapperOperations
             _mapper.Add(key, mapper);
             return mapper;
         }
-
+        /// <summary>
+        /// Maps an entity for <paramref name="entity"/>
+        /// </summary>
+        /// <param name="entity">Entity to be mapped</param>
+        /// <returns>The mapper built</returns>
+        /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
         public static MappedEntity? Map(Type entity)
         {
             var key = Utils.GetTypeKey(entity);
             if (IsEntityMapped(entity))
             {
                 ThrowErrorIfAlreadyMapped(entity);
-                return (MappedEntity?)_mapper[key];
+                return _mapper[key];
             }
 
             var mapper = new MappedEntity();
@@ -128,6 +140,12 @@ namespace DapperOperations
             return mapper;
         }
 
+        /// <summary>
+        /// Maps each element of <paramref name="entities"/>
+        /// </summary>
+        /// <param name="entities">Elements's type to be mapped</param>
+        /// <returns>Mapper buit for each element</returns>
+        /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
         public static List<MappedEntity?> Map(IEnumerable<Type> entities)
         {
             var mapeds = new List<MappedEntity?>();
@@ -138,16 +156,32 @@ namespace DapperOperations
             return mapeds;
         }
 
+        /// <summary>
+        /// Maps all entities of <paramref name="assembly"/> that are in <paramref name="namespaces"/>
+        /// </summary>
+        /// <param name="assembly">Assembly that references to all entities</param>
+        /// <param name="namespaces">Namespace to filter entities</param>
+        /// <returns>Collection of all mapped entities</returns>
+        /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
         public static List<MappedEntity?> Map(Assembly assembly, string namespaces)
         {
             var types = assembly.GetTypes().Where(a => a.Namespace == namespaces);
             return Map(types);
         }
 
-        public static List<MappedEntity?> MapFromAssemblyName(string fullName, string typesNameSpace)
+        /// <summary>
+        /// Maps all entities from a given <see cref="Assembly.FullName"/> and <see cref="Type.Namespace"/>
+        /// <br></br>
+        /// This function search in all assemblies locatted in <see cref="AppDomain"/>
+        /// </summary>
+        /// <param name="fullName">Full name of the <see cref="Assembly"/></param>
+        /// <param name="typeNameSpace">Namespace of the <see cref="Type"/></param>
+        /// <returns>Mapper buit for each element</returns>
+        /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
+        public static List<MappedEntity?> MapFromAssemblyName(string fullName, string typeNameSpace)
         {
-            var domainAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.Contains(fullName));
-            var models = domainAssembly?.GetTypes().Where(a => a.Namespace == typesNameSpace).ToList();
+            var domainAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => !string.IsNullOrEmpty(a.FullName) && a.FullName.Contains(fullName));
+            var models = domainAssembly?.GetTypes().Where(a => a.Namespace == typeNameSpace).ToList();
 
             if (models != null)
             {
@@ -156,48 +190,54 @@ namespace DapperOperations
             return Enumerable.Empty<MappedEntity?>().ToList();
         }
 
+        /// <summary>
+        /// Gets the mapper of the entity or adds it if don't
+        /// </summary>
+        /// <param name="entity">Type of the entity to be mapped</param>
+        /// <returns>New entity mapped or the mapper that is already added</returns>
         public static MappedEntity? GetOrAdd(Type entity)
         {
-            var value = new MappedEntity();
             var key = Utils.GetTypeKey(entity);
 
-            if (IsEntityMapped(entity))
+            var value = _mapper[key];
+
+            if (value != null)
             {
-                ThrowErrorIfAlreadyMapped(entity);
-                _mapper.Add(key, value);
                 return value;
             }
-            else
-            {
-                InitMap(value, entity);
-                _mapper.Add(key, value);
-                return value;
-            }
+
+            value = new MappedEntity();
+
+            InitMap(value, entity);
+            _mapper.Add(key, value);
+            return value;
         }
 
+        /// <summary>
+        /// Gets the mapper of <typeparamref name="T"/> or adds it if don't
+        /// </summary>
+        /// <typeparam name="T">Type of the entity to be mapped</typeparam>
+        /// <returns>New entity mapped or the mapper that is already added</returns>
         public static MappedEntity? GetOrAdd<T>() where T : class, new()
         {
-            var value = new MappedEntity<T>();
-            var key = Utils.GetTypeKey<T>();
-
-            if (IsEntityMapped(typeof(T)))
-            {
-                _mapper.Add(key, value);
-                return value;
-            }
-            else
-            {
-                InitMap(value, typeof(T));
-                _mapper.Add(key, value);
-                return value;
-            }
+            return GetOrAdd(typeof(T));
         }
 
+        /// <summary>
+        /// Checks if a mapper for <typeparamref name="T"/> already exists
+        /// </summary>
+        /// <typeparam name="T">Entity to check if is already mapped</typeparam>
+        /// <returns>true if is already mapped. Or false if isn't</returns>
         public static bool IsEntityMapped<T>() where T : class, new()
         {
-            return _mapper.ContainsKey(typeof(T).GUID);
+            return IsEntityMapped(typeof(T));
         }
 
+        /// <summary>
+        /// Checks if a mapper for an entity <paramref name="type"/> already exists
+        /// </summary>
+        /// <param name="type">Entity to check if is already mapped</param>
+        /// <returns>true if is already mapped. Or false if isn't</returns>
         public static bool IsEntityMapped(Type type)
         {
             return _mapper.ContainsKey(type.GUID);
@@ -242,7 +282,7 @@ namespace DapperOperations
                 }
                 if (prop.GetCustomAttributes(typeof(KeyAttribute)).Any())
                 {
-                    mapper.Key(prop.Name, prop.Name.FormatByConvetion());
+                    mapper.PrimaryKey(prop.Name, prop.Name.FormatByConvetion());
                 }
                 else if (prop.GetCustomAttributes(typeof(ColumnAttribute)).Any())
                 {
