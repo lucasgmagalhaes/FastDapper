@@ -17,7 +17,7 @@ namespace DapperOperations
         /// Gets the namming convention used to map each property to his
         /// refered column
         /// </summary>
-        public static NameConvetion NameConvetion => _nameConvetion;
+        public static NamingConvetion NameConvetion => _nameConvetion;
 
         /// <summary>
         /// Gets or set the definition of <see cref="DapperOperation"/> must
@@ -26,7 +26,7 @@ namespace DapperOperations
         public static bool ThrowIfAlreadyMapped { get; set; }
 
         private static readonly Dictionary<Guid, MappedEntity> _mapper = new();
-        private static NameConvetion _nameConvetion = NameConvetion.CamelCase;
+        private static NamingConvetion _nameConvetion = NamingConvetion.CamelCase;
 
         internal static bool HasMappedProperties { get; set; } = false;
 
@@ -38,7 +38,7 @@ namespace DapperOperations
         /// Throws an error if the attempting to change 
         /// the convetion after an entity be mapped
         /// </exception>
-        public static void SetNameConvention(NameConvetion nameConvetion)
+        public static void SetNameConvention(NamingConvetion nameConvetion)
         {
             if (HasMappedProperties)
             {

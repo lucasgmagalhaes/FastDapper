@@ -13,6 +13,6 @@ namespace DapperOperations.Test.Models
         public DateTime CreatedDate { get; set; }
 
         [Ignore]
-        public object Items { get; set; }
+        public object? Items { get; set; }
     }
 }

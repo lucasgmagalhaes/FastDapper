@@ -48,8 +48,6 @@ namespace BenchmakDapperOperation
     {
         public static void Main(string[] _)
         {
-            //DapperOperation.Map<Customer>();
-            //new Benchmark().BuildUpsertWithCache();
             BenchmarkRunner.Run(typeof(Program).Assembly);
         }
     }

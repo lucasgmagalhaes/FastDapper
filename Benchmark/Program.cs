@@ -31,16 +31,16 @@ namespace BenchmakDapperOperation
     [MemoryDiagnoser]
     public class Benchmak
     {
-        public IDbConnection con1;
-        public IDbConnection con2;
-        private Faker<Customer> faker;
+        private IDbConnection? con1;
+        private IDbConnection? con2;
+        private Faker<Customer>? faker;
 
         [Params(10, 50, 100, 200)]
         public int Count { get; set; }
 
-        private List<Customer> GetUsers()
+        private List<Customer>? GetUsers()
         {
-            return faker.Generate(Count);
+            return faker?.Generate(Count);
         }
 
         [GlobalSetup]
@@ -48,9 +48,9 @@ namespace BenchmakDapperOperation
         {
             var map = DapperOperation.CreateEmptyMap<Customer>();
             map.Table("customers");
-            map.Key(u => u.Id, "id");            
-            map.Column(u => u.Name);
-            map.Column(u => u.Email);
+            map.PrimaryKey(u => u.Id, "id");            
+            map.Column(u => u.Name ?? "");
+            map.Column(u => u.Email ?? "");
             map.Column(u => u.Active);
 
             SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);
@@ -65,7 +65,7 @@ namespace BenchmakDapperOperation
         [Benchmark]
         public async Task Insert_DapperSimpleCrud()
         {
-            foreach (var item in GetUsers())
+            foreach (var item in GetUsers() ?? Array.Empty<Customer>().ToList())
             {
                 await con1.InsertAsync(item);
             }
@@ -74,7 +74,7 @@ namespace BenchmakDapperOperation
         [Benchmark]
         public async Task Insert_DapperOperations()
         {
-            foreach (var item in GetUsers())
+            foreach (var item in GetUsers() ?? Array.Empty<Customer>().ToList())
             {
                 await con2.ExecuteAsync(Builder.BuildInsertStatement<Customer>(), item);
             }

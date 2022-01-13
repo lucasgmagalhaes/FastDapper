@@ -4,14 +4,15 @@ namespace DapperOperations
 {
     internal class UpsertCache
     {
-        public string FieldsFormatted { get; set; }
+        public string? FieldsFormatted { get; set; }
         public string[] Values { get; set; }
         public Hashtable Conflicts { get; set; }
-        public string Set { get; set; }
+        public string? Set { get; set; }
 
         public UpsertCache()
         {
             Conflicts = new Hashtable();
+            Values = Array.Empty<string>();
         }
 
         public string RepeatValues(int times)

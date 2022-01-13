@@ -39,9 +39,9 @@ namespace DapperOperations.Extensions
         {
             return DapperOperation.NameConvetion switch
             {
-                NameConvetion.PascalCase => input.ToPascalCase(),
-                NameConvetion.SnakeCase => input.ToSnakeCase(),
-                NameConvetion.CamelCase => input.ToCamelCase(),
+                NamingConvetion.PascalCase => input.ToPascalCase(),
+                NamingConvetion.SnakeCase => input.ToSnakeCase(),
+                NamingConvetion.CamelCase => input.ToCamelCase(),
                 _ => input,
             };
         }

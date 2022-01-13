@@ -7,10 +7,16 @@ using System.Text;
 
 namespace DapperOperations
 {
+    /// <summary>
+    /// Builder for all SQL statements
+    /// </summary>
     public static class Builder
     {
         private static readonly BuilderCache _cache = new();
 
+        /// <summary>
+        /// Builds insert query
+        /// </summary>
         public static string BuildInsertStatement<T>() where T : class, new()
         {
             var mapper = DapperOperation.Get<T>();
@@ -32,6 +38,16 @@ namespace DapperOperations
             return query;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="count"></param>
+        /// <param name="update"></param>
+        /// <param name="conflictKeys"></param>
+        /// <param name="useCache">Testing only</param>
+        /// <returns></returns>
+        /// <exception cref="SqlBuildingException"></exception>
         public static string BuildUpsertStatement<T>(int count, bool update, Expression<Func<T, object>>? conflictKeys = null, bool useCache = true) where T : class, new()
         {
             var mapper = DapperOperation.Get<T>();
@@ -151,6 +167,12 @@ namespace DapperOperations
             return queryBuilder.ToString();
         }
 
+        /// <summary>
+        /// Builds upser query
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="SqlBuildingException"></exception>
         public static string BuildUpdateStatement<T>() where T : class, new()
         {
             var mapper = DapperOperation.Get<T>();
@@ -177,6 +199,9 @@ namespace DapperOperations
             return query;
         }
 
+        /// <summary>
+        /// Converts a collection of entities into a single object
+        /// </summary>
         public static object UnifyEntities<T>(T[] entities)
         {
             var full = new ExpandoObject() as IDictionary<string, object>;
