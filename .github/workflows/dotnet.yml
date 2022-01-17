@@ -18,8 +18,8 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore DapperOperations
+      run: dotnet restore FastDapper
     - name: Build
-      run: dotnet build DapperOperations --no-restore
+      run: dotnet build FastDapper --no-restore
     - name: Test
-      run: dotnet test DapperOperations --no-build --verbosity normal
+      run: dotnet test FastDapper --no-build --verbosity normal

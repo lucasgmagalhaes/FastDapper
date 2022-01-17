@@ -1,8 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using DapperOperations;
+using FastDapper;
 
-namespace BenchmakDapperOperation
+namespace BenchmakFastDapper
 {
     public class Customer
     {
@@ -22,13 +22,13 @@ namespace BenchmakDapperOperation
         [GlobalSetup]
         public void Setup()
         {
-            DapperOperation.Map<Customer>();
+            FastManager.Map<Customer>();
         }
 
         [Benchmark]
         public void BuildUpsertWithCache()
         {
-            for (int i = 0; i < 300; i++)
+            for (int i = 0; i < 10; i++)
             {
                 Builder.BuildUpsertStatement<Customer>(3, true, u => new { u.Id, u.Name }, true);
             }
@@ -37,7 +37,7 @@ namespace BenchmakDapperOperation
         [Benchmark]
         public void BuildUpsertWithoutCache()
         {
-            for (int i = 0; i < 300; i++)
+            for (int i = 0; i < 10; i++)
             {
                 Builder.BuildUpsertStatement<Customer>(3, true, u => new { u.Id, u.Name }, false);
             }
@@ -48,6 +48,8 @@ namespace BenchmakDapperOperation
     {
         public static void Main(string[] _)
         {
+            //FastDapper.Map<Customer>();
+            //new Benchmak().BuildUpsertWithCache();
             BenchmarkRunner.Run(typeof(Program).Assembly);
         }
     }

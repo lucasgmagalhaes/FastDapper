@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Dapper;
 using System.Data;
-using DapperOperations;
+using FastDapper;
 using BenchmarkDotNet.Running;
 using Npgsql;
 using Bogus;
@@ -9,7 +9,7 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Exporters.Csv;
 using BenchmarkDotNet.Exporters;
 
-namespace BenchmakDapperOperation
+namespace BenchmakFastDapper
 {
     [Table("customers2")]
     public class Customer
@@ -26,8 +26,8 @@ namespace BenchmakDapperOperation
         [Column("active")]
         public bool Active { get; set; }
     }
-
-    [MarkdownExporter, AsciiDocExporter, HtmlExporter, CsvMeasurementsExporter, RPlotExporter]
+    
+    //[MarkdownExporter, AsciiDocExporter, HtmlExporter, CsvMeasurementsExporter, RPlotExporter]
     [MemoryDiagnoser]
     public class Benchmak
     {
@@ -35,7 +35,7 @@ namespace BenchmakDapperOperation
         private IDbConnection? con2;
         private Faker<Customer>? faker;
 
-        [Params(10, 50, 100, 200)]
+        [Params(1, 5, 10, 50, 100)]
         public int Count { get; set; }
 
         private List<Customer>? GetUsers()
@@ -46,11 +46,11 @@ namespace BenchmakDapperOperation
         [GlobalSetup]
         public void Setup()
         {
-            var map = DapperOperation.CreateEmptyMap<Customer>();
+            var map = FastManager.CreateEmptyMap<Customer>();
             map.Table("customers");
             map.PrimaryKey(u => u.Id, "id");            
-            map.Column(u => u.Name ?? "");
-            map.Column(u => u.Email ?? "");
+            map.Column(u => u.Name);
+            map.Column(u => u.Email);
             map.Column(u => u.Active);
 
             SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);
@@ -72,7 +72,7 @@ namespace BenchmakDapperOperation
         }
 
         [Benchmark]
-        public async Task Insert_DapperOperations()
+        public async Task Insert_FastDapper()
         {
             foreach (var item in GetUsers() ?? Array.Empty<Customer>().ToList())
             {

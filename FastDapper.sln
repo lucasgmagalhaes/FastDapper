@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastDapper", "FastDapper\FastDapper.csproj", "{7EEA13C5-0538-422F-BBD5-E8C17E702C4F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastDapper.Test", "FastDapper.Test\FastDapper.Test.csproj", "{EAB7914C-57B3-4077-AFF8-B0B9CEE9C9B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "Benchmark\Benchmark.csproj", "{8C976C0B-41F1-4888-803B-34FC900FAC2A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark.Caching", "Benchmark.Caching\Benchmark.Caching.csproj", "{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{750AE4FA-3FBE-41EA-B8F8-B9911A2781F2}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		generatePngs.bat = generatePngs.bat
+		LICENSE = LICENSE
+		nuget.config = nuget.config
+		package.bat = package.bat
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7EEA13C5-0538-422F-BBD5-E8C17E702C4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EEA13C5-0538-422F-BBD5-E8C17E702C4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EEA13C5-0538-422F-BBD5-E8C17E702C4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EEA13C5-0538-422F-BBD5-E8C17E702C4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAB7914C-57B3-4077-AFF8-B0B9CEE9C9B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAB7914C-57B3-4077-AFF8-B0B9CEE9C9B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAB7914C-57B3-4077-AFF8-B0B9CEE9C9B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAB7914C-57B3-4077-AFF8-B0B9CEE9C9B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C976C0B-41F1-4888-803B-34FC900FAC2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C976C0B-41F1-4888-803B-34FC900FAC2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C976C0B-41F1-4888-803B-34FC900FAC2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C976C0B-41F1-4888-803B-34FC900FAC2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{059ADEB1-8C48-4699-A29F-0C5F7FBDEAFD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E6512CC9-367E-44E3-8FBF-A515BA5857DE}
+	EndGlobalSection
+EndGlobal

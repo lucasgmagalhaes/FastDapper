@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DapperOperations\DapperOperations.csproj" />
+    <ProjectReference Include="..\FastDapper\FastDapper.csproj" />
   </ItemGroup>
 
 </Project>
