@@ -5,7 +5,9 @@
         Insert,
         Update,
         Delete,
+        DeleteById,
         Select,
-        SelectById
+        SelectById,
+        Count,
     }
 }

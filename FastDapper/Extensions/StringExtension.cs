@@ -10,7 +10,7 @@ namespace FastDapper.Extensions
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string ToSnakeCase(this string input)
+        internal static string ToSnakeCase(this string input)
         {
             if (string.IsNullOrEmpty(input))
                 return input;
@@ -19,14 +19,14 @@ namespace FastDapper.Extensions
             return startUnderscores + Regex.Replace(input, @"([a-z0-9])([A-Z])", "$1_$2").ToLower();
         }
 
-        public static string ToPascalCase(this string input)
+        internal static string ToPascalCase(this string input)
         {
             var yourString = input.ToLower().Replace("_", " ");
             TextInfo info = CultureInfo.CurrentCulture.TextInfo;
             return info.ToTitleCase(yourString).Replace(" ", string.Empty);
         }
 
-        public static string ToCamelCase(this string input)
+        internal static string ToCamelCase(this string input)
         {
             if (!string.IsNullOrEmpty(input) && input.Length > 1)
             {
@@ -35,7 +35,7 @@ namespace FastDapper.Extensions
             return input;
         }
 
-        public static string FormatByConvetion(this string input)
+        internal static string FormatByConvetion(this string input)
         {
             return FastManager.NameConvetion switch
             {
