@@ -1,13 +1,12 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Dapper;
-using System.Data;
-using FastDapper;
-using BenchmarkDotNet.Running;
-using Npgsql;
-using Bogus;
-using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Exporters.Csv;
 using BenchmarkDotNet.Exporters;
+using BenchmarkDotNet.Exporters.Csv;
+using BenchmarkDotNet.Running;
+using Bogus;
+using Dapper;
+using FastDapper;
+using Npgsql;
+using System.Data;
 
 namespace BenchmakFastDapper
 {
@@ -26,8 +25,8 @@ namespace BenchmakFastDapper
         [Column("active")]
         public bool Active { get; set; }
     }
-    
-    //[MarkdownExporter, AsciiDocExporter, HtmlExporter, CsvMeasurementsExporter, RPlotExporter]
+
+    [MarkdownExporter, AsciiDocExporter, HtmlExporter, CsvMeasurementsExporter, RPlotExporter]
     [MemoryDiagnoser]
     public class Benchmak
     {
@@ -35,7 +34,7 @@ namespace BenchmakFastDapper
         private IDbConnection? con2;
         private Faker<Customer>? faker;
 
-        [Params(1, 5, 10, 50, 100)]
+        [Params(1, 5, 10, 50)]
         public int Count { get; set; }
 
         private List<Customer>? GetUsers()
@@ -48,7 +47,7 @@ namespace BenchmakFastDapper
         {
             var map = FastManager.CreateEmptyMap<Customer>();
             map.Table("customers");
-            map.PrimaryKey(u => u.Id, "id");            
+            map.PrimaryKey(u => u.Id, "id");
             map.Column(u => u.Name);
             map.Column(u => u.Email);
             map.Column(u => u.Active);
