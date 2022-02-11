@@ -1,4 +1,5 @@
 ﻿using FastDapper.Exceptions;
+using FastDapper.Extensions;
 using FastDapper.Mapping;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
@@ -10,14 +11,14 @@ namespace FastDapper
     /// <summary>
     /// Builder for all SQL statements
     /// </summary>
-    public static class Builder
+    internal static class Builder
     {
         private static readonly Cache _cache = new();
 
         /// <summary>
         /// Builds insert query
         /// </summary>
-        public static string BuildInsertStatement<T>() where T : class, new()
+        internal static string BuildInsertStatement<T>() where T : class, new()
         {
             var mapper = FastManager.Get<T>();
 
@@ -48,7 +49,7 @@ namespace FastDapper
         /// <param name="useCache">Testing only</param>
         /// <returns></returns>
         /// <exception cref="SqlBuildingException"></exception>
-        public static string BuildUpsertStatement<T>(int count, bool update, Expression<Func<T, object>>? conflictKeys = null, bool useCache = true) where T : class, new()
+        internal static string BuildUpsertStatement<T>(int count, bool update, Expression<Func<T, object>>? conflictKeys = null, bool useCache = true) where T : class, new()
         {
             var mapper = FastManager.Get<T>();
 
@@ -173,7 +174,7 @@ namespace FastDapper
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <exception cref="SqlBuildingException"></exception>
-        public static string BuildSelectByIdQuery<T>(object id) where T : class, new()
+        internal static string BuildSelectByIdQuery<T>(object id) where T : class, new()
         {
             var mapper = FastManager.Get<T>();
 
@@ -185,22 +186,91 @@ namespace FastDapper
             return BuildSelectQuery(id, QueryType.SelectById, mapper.ColumnsMap, mapper);
         }
 
-        public static string BuildDeleteByIdQuery<T>(T entity)
+        internal static string BuildDeleteByIdQuery<T>() where T : class, new()
         {
-            return "";
+            var mapper = FastManager.Get<T>();
+
+            if (mapper == null)
+            {
+                throw new SqlBuildingException("Mapper not found for " + typeof(T).Name);
+            }
+
+            var cache = _cache.GetQuery<T>(QueryType.DeleteById);
+
+            if (cache.HasValue())
+            {
+                return cache;
+            }
+
+            var query = $"DELETE {mapper.GetFormattedTableName()} WHERE {mapper.GetPrimaryKeysForWhere()}";
+            _cache.AddQuery<T>(query, QueryType.DeleteById);
+            return query;
         }
 
-        public static string BuildDeleteQuery<T>(object filter)
+        internal static string BuildDeleteQuery<T>(object filter) where T : class, new()
         {
-            return "";
+            var mapper = FastManager.Get<T>();
+
+            if (mapper == null)
+            {
+                throw new SqlBuildingException("Mapper not found for " + typeof(T).Name);
+            }
+
+            var cache = _cache.GetQuery<T>(QueryType.Delete, filter);
+
+            if (cache.HasValue())
+            {
+                return cache;
+            }
+
+            var query = $"DELETE {mapper.GetFormattedTableName()} WHERE {mapper.GetWhereStatement(filter)}";
+            _cache.AddQuery<T>(query, QueryType.Delete);
+            return query;
         }
 
-        public static string BuildDeleteAllQuery<T>()
+        internal static string BuildDeleteAllQuery<T>() where T : class, new()
         {
-            return "";
+            var mapper = FastManager.Get<T>();
+
+            if (mapper == null)
+            {
+                throw new SqlBuildingException("Mapper not found for " + typeof(T).Name);
+            }
+
+            var cache = _cache.GetQuery<T>(QueryType.DeleteAll);
+
+            if (cache.HasValue())
+            {
+                return cache;
+            }
+
+            var query = $"DELETE {mapper.GetFormattedTableName()}";
+            _cache.AddQuery<T>(query, QueryType.Delete);
+            return query;
         }
 
-        public static string BuildSelectQuery<T>(object filter) where T : class, new()
+        internal static string BuildTruncateQuery<T>() where T : class, new()
+        {
+            var mapper = FastManager.Get<T>();
+
+            if (mapper == null)
+            {
+                throw new SqlBuildingException("Mapper not found for " + typeof(T).Name);
+            }
+
+            var cache = _cache.GetQuery<T>(QueryType.Truncate);
+
+            if (cache.HasValue())
+            {
+                return cache;
+            }
+
+            var query = $"TRUNCATE TABLE {mapper.GetFormattedTableName()}";
+            _cache.AddQuery<T>(query, QueryType.Truncate);
+            return query;
+        }
+
+        internal static string BuildSelectQuery<T>(object filter) where T : class, new()
         {
             var mapper = FastManager.Get<T>();
 
@@ -218,7 +288,7 @@ namespace FastDapper
 
             if (query == null)
             {
-                var builder = new StringBuilder($"SELECT * FROM {mapper.GetFormattedTableName()} WHERE ");
+                var builder = new StringBuilder($"SELECT {mapper.GetColumnsForSelect()} FROM {mapper.GetFormattedTableName()} WHERE ");
                 if (filter.GetType().IsPrimitive)
                 {
                     foreach (var (prop, column) in columnPairs.Where(v => v.Key == filter.GetType().Name))
@@ -244,7 +314,7 @@ namespace FastDapper
             return query;
         }
 
-        public static string BuildSelectQuery<T>() where T : class, new()
+        internal static string BuildSelectQuery<T>() where T : class, new()
         {
             var mapper = FastManager.Get<T>();
 
@@ -278,7 +348,7 @@ namespace FastDapper
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <exception cref="SqlBuildingException"></exception>
-        public static string BuildUpdateStatement<T>() where T : class, new()
+        internal static string BuildUpdateStatement<T>() where T : class, new()
         {
             var mapper = FastManager.Get<T>();
 
@@ -304,10 +374,39 @@ namespace FastDapper
             return query;
         }
 
+        internal static string BuildCountQuery<T>(object? filter = null) where T : class, new()
+        {
+            var mapper = FastManager.Get<T>();
+
+            if (mapper == null)
+            {
+                throw new SqlBuildingException("Mapper not found for " + typeof(T).Name);
+            }
+
+            var query = _cache.GetQuery<T>(QueryType.Count, filter);
+
+            if (query.HasValue())
+            {
+                return query;
+            }
+
+            if (filter != null)
+            {
+                query = $"SELECT COUNT(1) FROM {mapper.GetFormattedTableName()} WHERE {mapper.GetWhereStatement(filter)}";
+            }
+            else
+            {
+                query = $"SELECT COUNT(1) FROM {mapper.GetFormattedTableName()}";
+            }
+
+            _cache.AddQuery<T>(query, QueryType.Count, filter);
+            return query;
+        }
+
         /// <summary>
         /// Converts a collection of entities into a single object
         /// </summary>
-        public static object UnifyEntities<T>(T[] entities)
+        internal static object UnifyEntities<T>(T[] entities)
         {
             var full = new ExpandoObject() as IDictionary<string, object>;
             for (int i = 0; i < entities.Length; i++)

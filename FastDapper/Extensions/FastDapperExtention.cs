@@ -218,7 +218,7 @@ namespace FastDapper.Extensions
 
         public static void DeleteById<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
-            var query = Builder.BuildDeleteByIdQuery<T>(entity);
+            var query = Builder.BuildDeleteByIdQuery<T>();
             try
             {
                 con.Execute(query, entity, transaction, commandTimeout: commandTimeout);
@@ -231,7 +231,7 @@ namespace FastDapper.Extensions
 
         public static async Task DeleteByIdAsync<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
-            var query = Builder.BuildDeleteByIdQuery<T>(entity);
+            var query = Builder.BuildDeleteByIdQuery<T>();
             try
             {
                 await con.ExecuteAsync(query, entity, transaction, commandTimeout: commandTimeout);
@@ -242,7 +242,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static void Delete<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static void Delete<T>(this IDbConnection con, object entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildDeleteQuery<T>(entity);
             try
@@ -255,7 +255,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static async Task DeleteAsync<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task DeleteAsync<T>(this IDbConnection con, object entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildDeleteQuery<T>(entity);
             try
@@ -294,9 +294,35 @@ namespace FastDapper.Extensions
             }
         }
 
+        public static void Truncate<T>(this IDbConnection con, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        {
+            var query = Builder.BuildTruncateQuery<T>();
+            try
+            {
+                con.Execute(query, transaction: transaction, commandTimeout: commandTimeout);
+            }
+            catch (Exception ex)
+            {
+                throw BuildExecutionException(query, ex);
+            }
+        }
+
+        public static async Task TruncateAsync<T>(this IDbConnection con, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        {
+            var query = Builder.BuildTruncateQuery<T>();
+            try
+            {
+                await con.ExecuteAsync(query, transaction: transaction, commandTimeout: commandTimeout);
+            }
+            catch (Exception ex)
+            {
+                throw BuildExecutionException(query, ex);
+            }
+        }
+
         public static int Count<T>(this IDbConnection con, object filter, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
-            var query = Builder.BuildSelectByIdQuery<T>(filter);
+            var query = Builder.BuildCountQuery<T>(filter);
             try
             {
                 return con.QueryFirstOrDefault<int>(query, filter, transaction, commandTimeout: commandTimeout);
@@ -309,7 +335,7 @@ namespace FastDapper.Extensions
 
         public static async Task<int> CountAsync<T>(this IDbConnection con, object filter, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
         {
-            var query = Builder.BuildSelectByIdQuery<T>(filter);
+            var query = Builder.BuildCountQuery<T>(filter);
             try
             {
                 return await con.QueryFirstOrDefaultAsync<int>(query, filter, transaction, commandTimeout: commandTimeout);

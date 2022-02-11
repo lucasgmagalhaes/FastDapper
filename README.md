@@ -14,6 +14,7 @@ Provides simple CRUD operations including bulk insert and upsert
 - Delete / DeleteAsync
 - DeleteById / DeleteByIdAsync
 - DeleteAll / DeleteAllAsync
+- TruncateAsync / TruncateAsync
 - Insert / InsertAsync (Single and multiple entities)
 - Upsert (Merge)
 - GetById / GetByIdAsync

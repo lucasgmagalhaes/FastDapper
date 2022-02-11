@@ -1,6 +1,6 @@
 ﻿using FastDapper.Exceptions;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace FastDapper.Mapping
 {
@@ -82,6 +82,42 @@ namespace FastDapper.Mapping
 
             TableName = name;
             SchemaName = schema;
+        }
+
+        internal string GetColumnsForSelect()
+        {
+            var sb = new StringBuilder();
+            foreach (var (prop, column) in ColumnsMap)
+            {
+                sb.Append($"{column} as {prop}");
+            }
+            return sb.ToString();
+        }
+
+        internal string GetPrimaryKeysForWhere()
+        {
+            var sb = new StringBuilder();
+            foreach (var (prop, column) in KeyMap)
+            {
+                sb.Append($"{column} = @{prop}");
+            }
+            return sb.ToString();
+        }
+
+        internal string GetWhereStatement(object filter)
+        {
+            var sb = new StringBuilder();
+            foreach (var prop in filter.GetType().GetProperties())
+            {
+                var colName = GetColumnName(prop.Name);
+                sb.Append($"{colName} = @{prop.Name}");
+            }
+            return sb.ToString();
+        }
+
+        private string GetColumnName(string key)
+        {
+            return KeyMap.GetValueOrDefault(key) ?? ColumnsMap.GetValueOrDefault(key) ?? key;
         }
 
         internal string GetFormattedTableName()

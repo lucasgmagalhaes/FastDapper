@@ -45,5 +45,10 @@ namespace FastDapper.Extensions
                 _ => input,
             };
         }
+
+        internal static bool HasValue(this string input)
+        {
+            return !string.IsNullOrEmpty(input);
+        }
     }
 }
