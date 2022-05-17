@@ -10,7 +10,7 @@ namespace FastDapper
         public string AddQuery<T>(string query, QueryType queryType, object filter = null)
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var queryCache = _cache[key];
+            _cache.TryGetValue(key, out var queryCache);
             if (queryCache == null)
             {
                 queryCache = new EntityQuery();
@@ -64,7 +64,7 @@ namespace FastDapper
         public string GetQuery<T>(QueryType queryType, object filter = null)
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var queryCache = _cache[key];
+            _cache.TryGetValue(key, out var queryCache);
 
             if (queryCache == null)
             {
@@ -102,7 +102,7 @@ namespace FastDapper
         public UpsertCache AddUpsertCache<T>(UpsertCache cache)
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = _cache[key];
+            _cache.TryGetValue(key, out var query);
             if (query == null)
             {
                 _cache.Add(key, new EntityQuery { Upsert = cache });
@@ -115,7 +115,7 @@ namespace FastDapper
         public UpsertCache GetUpsertCache<T>()
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = _cache[key];
+            _cache.TryGetValue(key, out var query);
             if (query == null)
             {
                 return null;

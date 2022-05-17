@@ -119,7 +119,17 @@ namespace FastDapper.Mapping
 
         private string GetColumnName(string key)
         {
-            return KeyMap[key] ?? ColumnsMap[key] ?? key;
+            if (KeyMap.TryGetValue(key, out var keyName))
+            {
+                return keyName;
+            }
+
+            if (ColumnsMap.TryGetValue(key, out var columnName))
+            {
+                return columnName;
+            }
+
+            return key;
         }
 
         internal string GetFormattedTableName()

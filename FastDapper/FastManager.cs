@@ -200,7 +200,7 @@ namespace FastDapper
         {
             var key = Utils.GetTypeKey(entity);
 
-            var value = _mapper[key];
+            _mapper.TryGetValue(key, out var value);
 
             if (value != null)
             {
@@ -223,18 +223,16 @@ namespace FastDapper
         {
             var key = Utils.GetTypeKey(typeof(T));
 
-            var value = (MappedEntity<T>)_mapper[key];
-
-            if (value != null)
+            if (_mapper.TryGetValue(key, out var value))
             {
-                return value;
+                return (MappedEntity<T>)value;
             }
 
             value = new MappedEntity<T>();
 
             InitMap(value, typeof(T));
             _mapper.Add(key, value);
-            return value;
+            return (MappedEntity<T>)value;
         }
 
         /// <summary>

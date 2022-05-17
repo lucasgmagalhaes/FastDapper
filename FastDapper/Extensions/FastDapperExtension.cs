@@ -10,7 +10,7 @@ namespace FastDapper.Extensions
     /// <summary>
     /// Represents all extension CRUD operations for <see cref="Dapper"/>
     /// </summary>
-    public static class FastDapperExtention
+    public static class FastDapperExtension
     {
         /// <summary>
         /// Persists <b>synchronously</b> an entity <typeparamref name="T"/> into database.

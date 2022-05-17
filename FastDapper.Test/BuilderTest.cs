@@ -20,10 +20,13 @@ namespace FastDapper.Test
         }
 
         [Fact]
-        public void ShouldGenerateBulkInsertQuery()
+        public void ShouldGenerateBulkUpsertQuery()
         {
             var query = Builder.BuildUpsertStatement<User3>(3, true, u => new { u.Id, u.Name });
-            Assert.Equal(@"insert into user3 (""Name"", ""Age"") values (@Name_0, @Age_0),(@Name_1, @Age_1),(@Name_2, @Age_2) on conflict (id,name) do update set name = excluded.name,age = excluded.age", query);
+            Assert.Equal(
+                @"insert into user3 (""Name"", ""Age"") values " +
+                "(@Name_0, @Age_0),(@Name_1, @Age_1),(@Name_2, @Age_2) " + 
+                "on conflict (id,name) do update set name = excluded.name,age = excluded.age", query);
         }
 
         [Fact]
@@ -75,7 +78,7 @@ namespace FastDapper.Test
         public void ShouldGenerateBuildDeleteByIdQuery()
         {
             var query = Builder.BuildDeleteByIdQuery<User3>();
-            Assert.Equal("delete from user3 where ", query);
+            Assert.Equal("delete from user3 where id = @Id", query);
         }
     }
 }

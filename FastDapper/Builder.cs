@@ -54,7 +54,7 @@ namespace FastDapper
         /// <exception cref="SqlBuildingException"></exception>
         internal static string BuildUpsertStatement<T>(int count, bool update, Expression<Func<T, object>> conflictKeys = null, bool useCache = true) where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -179,7 +179,7 @@ namespace FastDapper
         /// <exception cref="SqlBuildingException"></exception>
         internal static string BuildSelectByIdQuery<T>(object id) where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -205,7 +205,7 @@ namespace FastDapper
                 return cache;
             }
 
-            var query = $"delete {mapper.GetFormattedTableName()} where {mapper.GetPrimaryKeysForWhere()}";
+            var query = $"delete from {mapper.GetFormattedTableName()} where {mapper.GetPrimaryKeysForWhere()}";
             _cache.AddQuery<T>(query, QueryType.DeleteById);
             return query;
         }
