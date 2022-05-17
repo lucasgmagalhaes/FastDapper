@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 
 namespace FastDapper.Exceptions
@@ -21,7 +22,7 @@ namespace FastDapper.Exceptions
         /// Initializes the exception with a message
         /// </summary>
         /// <param name="message">Message of the exception</param>
-        public QueryException(string? message) : base(message)
+        public QueryException(string message) : base(message)
         {
         }
 
@@ -30,7 +31,7 @@ namespace FastDapper.Exceptions
         /// </summary>
         /// <param name="message">Message of the exception</param>
         /// <param name="innerException">Inner exception of the exception</param>
-        public QueryException(string? message, Exception? innerException) : base(message, innerException)
+        public QueryException(string message, Exception innerException) : base(message, innerException)
         {
         }
 

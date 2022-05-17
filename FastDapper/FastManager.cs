@@ -2,8 +2,9 @@
 using FastDapper.Exceptions;
 using FastDapper.Extensions;
 using FastDapper.Mapping;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace FastDapper
@@ -25,7 +26,7 @@ namespace FastDapper
         /// </summary>
         public static bool ThrowIfAlreadyMapped { get; set; }
 
-        private static readonly Dictionary<Guid, MappedEntity> _mapper = new();
+        private static readonly Dictionary<Guid, MappedEntity> _mapper = new Dictionary<Guid, MappedEntity>();
         private static NamingConvetion _nameConvetion = NamingConvetion.CamelCase;
 
         internal static bool HasMappedProperties { get; set; } = false;
@@ -53,10 +54,10 @@ namespace FastDapper
         /// </summary>
         /// <typeparam name="T">Entity mapped</typeparam>
         /// <returns>The mapper of entity <typeparamref name="T"/> or null</returns>
-        public static MappedEntity<T>? Get<T>() where T : class, new()
+        public static MappedEntity<T> Get<T>() where T : class, new()
         {
             var key = Utils.GetTypeKey<T>();
-            var entity = _mapper.GetValueOrDefault(key);
+            _mapper.TryGetValue(key, out var entity);
             if (entity == null)
             {
                 return null;
@@ -69,10 +70,10 @@ namespace FastDapper
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public static MappedEntity? Get(Type model)
+        public static MappedEntity Get(Type model)
         {
             var key = Utils.GetTypeKey(model);
-            var entity = _mapper.GetValueOrDefault(key);
+            _mapper.TryGetValue(key, out var entity);
             if (entity == null)
             {
                 return null;
@@ -105,13 +106,13 @@ namespace FastDapper
         /// <typeparam name="T">Entity to be mapped</typeparam>
         /// <returns>The mapper built</returns>
         /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
-        public static MappedEntity<T>? Map<T>() where T : class, new()
+        public static MappedEntity<T> Map<T>() where T : class, new()
         {
             var key = Utils.GetTypeKey<T>();
             if (IsEntityMapped(typeof(T)))
             {
                 ThrowErrorIfAlreadyMapped<T>();
-                return (MappedEntity<T>?)_mapper.GetValueOrDefault(key);
+                return (MappedEntity<T>)_mapper[key];
             }
 
             var mapper = new MappedEntity<T>();
@@ -125,13 +126,13 @@ namespace FastDapper
         /// <param name="entity">Entity to be mapped</param>
         /// <returns>The mapper built</returns>
         /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
-        public static MappedEntity? Map(Type entity)
+        public static MappedEntity Map(Type entity)
         {
             var key = Utils.GetTypeKey(entity);
             if (IsEntityMapped(entity))
             {
                 ThrowErrorIfAlreadyMapped(entity);
-                return _mapper.GetValueOrDefault(key);;
+                return _mapper[key];
             }
 
             var mapper = new MappedEntity();
@@ -146,9 +147,9 @@ namespace FastDapper
         /// <param name="entities">Elements's type to be mapped</param>
         /// <returns>Mapper buit for each element</returns>
         /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
-        public static List<MappedEntity?> Map(IEnumerable<Type> entities)
+        public static List<MappedEntity> Map(IEnumerable<Type> entities)
         {
-            var mapeds = new List<MappedEntity?>();
+            var mapeds = new List<MappedEntity>();
             foreach (var entity in entities)
             {
                 mapeds.Add(Map(entity));
@@ -163,7 +164,7 @@ namespace FastDapper
         /// <param name="namespaces">Namespace to filter entities</param>
         /// <returns>Collection of all mapped entities</returns>
         /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
-        public static List<MappedEntity?> Map(Assembly assembly, string namespaces)
+        public static List<MappedEntity> Map(Assembly assembly, string namespaces)
         {
             var types = assembly.GetTypes().Where(a => a.Namespace == namespaces);
             return Map(types);
@@ -178,7 +179,7 @@ namespace FastDapper
         /// <param name="typeNameSpace">Namespace of the <see cref="Type"/></param>
         /// <returns>Mapper buit for each element</returns>
         /// <exception cref="MappingException">Throws if the entity is already mapped</exception>
-        public static List<MappedEntity?> MapFromAssemblyName(string fullName, string typeNameSpace)
+        public static List<MappedEntity> MapFromAssemblyName(string fullName, string typeNameSpace)
         {
             var domainAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => !string.IsNullOrEmpty(a.FullName) && a.FullName.Contains(fullName));
             var models = domainAssembly?.GetTypes().Where(a => a.Namespace == typeNameSpace).ToList();
@@ -187,7 +188,7 @@ namespace FastDapper
             {
                 return Map(models);
             }
-            return Enumerable.Empty<MappedEntity?>().ToList();
+            return Enumerable.Empty<MappedEntity>().ToList();
         }
 
         /// <summary>
@@ -195,11 +196,11 @@ namespace FastDapper
         /// </summary>
         /// <param name="entity">Type of the entity to be mapped</param>
         /// <returns>New entity mapped or the mapper that is already added</returns>
-        public static MappedEntity? GetOrAdd(Type entity)
+        public static MappedEntity GetOrAdd(Type entity)
         {
             var key = Utils.GetTypeKey(entity);
 
-            var value = _mapper.GetValueOrDefault(key);;
+            var value = _mapper[key];
 
             if (value != null)
             {
@@ -218,9 +219,22 @@ namespace FastDapper
         /// </summary>
         /// <typeparam name="T">Type of the entity to be mapped</typeparam>
         /// <returns>New entity mapped or the mapper that is already added</returns>
-        public static MappedEntity? GetOrAdd<T>() where T : class, new()
+        public static MappedEntity<T> GetOrAdd<T>() where T : class, new()
         {
-            return GetOrAdd(typeof(T));
+            var key = Utils.GetTypeKey(typeof(T));
+
+            var value = (MappedEntity<T>)_mapper[key];
+
+            if (value != null)
+            {
+                return value;
+            }
+
+            value = new MappedEntity<T>();
+
+            InitMap(value, typeof(T));
+            _mapper.Add(key, value);
+            return value;
         }
 
         /// <summary>
@@ -253,7 +267,8 @@ namespace FastDapper
             var tableAttribute = model.GetCustomAttribute<TableAttribute>();
 
             string tableName;
-            string? schemaName = null;
+            string schemaName = null;
+
             if (tableAttribute != null)
             {
                 tableName = tableAttribute.Name;
@@ -280,7 +295,7 @@ namespace FastDapper
                 {
                     continue;
                 }
-                if (prop.GetCustomAttributes(typeof(KeyAttribute)).Any())
+                if (prop.GetCustomAttributes(typeof(PrimaryKeyAttribute)).Any())
                 {
                     mapper.PrimaryKey(prop.Name, prop.Name.FormatByConvetion());
                 }

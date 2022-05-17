@@ -1,6 +1,5 @@
 using FastDapper.Test.Models;
 using Xunit;
-using FastDapper;
 
 namespace FastDapper.Test
 {

@@ -37,13 +37,21 @@ namespace FastDapper.Extensions
 
         internal static string FormatByConvetion(this string input)
         {
-            return FastManager.NameConvetion switch
+            switch (FastManager.NameConvetion)
             {
-                NamingConvetion.PascalCase => input.ToPascalCase(),
-                NamingConvetion.SnakeCase => input.ToSnakeCase(),
-                NamingConvetion.CamelCase => input.ToCamelCase(),
-                _ => input,
-            };
+                case NamingConvetion.PascalCase:
+                    return input.ToPascalCase();
+
+                case NamingConvetion.SnakeCase:
+                    return input.ToSnakeCase();
+
+                case NamingConvetion.CamelCase:
+                    return input.ToCamelCase();
+
+                default:
+                    return input;
+
+            }
         }
 
         internal static bool HasValue(this string input)

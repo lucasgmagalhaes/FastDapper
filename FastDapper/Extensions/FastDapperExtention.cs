@@ -1,6 +1,9 @@
 ﻿using Dapper;
 using FastDapper.Exceptions;
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace FastDapper.Extensions
 {
@@ -29,7 +32,7 @@ namespace FastDapper.Extensions
         /// <param name="transaction">The transaction to use for this query.</param>
         /// <param name="commandTimeout">Number of seconds before command execution timeout.</param>
         /// <returns>The number of Rows affected"/></returns>
-        public static int Insert<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static int Insert<T>(this IDbConnection con, T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildInsertStatement<T>();
             try
@@ -62,7 +65,7 @@ namespace FastDapper.Extensions
         /// <param name="transaction">The transaction to use for this query.</param>
         /// <param name="commandTimeout">Number of seconds before command execution timeout.</param>
         /// <returns>The number of Rows affected"/></returns>
-        public static async Task<int> InsertAsync<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task<int> InsertAsync<T>(this IDbConnection con, T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildInsertStatement<T>();
             try
@@ -96,7 +99,7 @@ namespace FastDapper.Extensions
         /// <param name="transaction">The transaction to use for this query.</param>
         /// <param name="commandTimeout">Number of seconds before command execution timeout.</param>
         /// <returns>The number of Rows affected"/></returns>
-        public static int Update<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static int Update<T>(this IDbConnection con, T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildUpdateStatement<T>();
             try
@@ -129,7 +132,7 @@ namespace FastDapper.Extensions
         /// <param name="transaction">The transaction to use for this query.</param>
         /// <param name="commandTimeout">Number of seconds before command execution timeout.</param>
         /// <returns>The number of Rows affected"/></returns>
-        public static async Task<int> UpdateAsync<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task<int> UpdateAsync<T>(this IDbConnection con, T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildUpdateStatement<T>();
             try
@@ -163,7 +166,7 @@ namespace FastDapper.Extensions
         /// <param name="transaction">The transaction to use for this query.</param>
         /// <param name="commandTimeout">Number of seconds before command execution timeout.</param>
         /// <returns></returns>
-        public static T GetById<T>(this IDbConnection con, object id, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static T GetById<T>(this IDbConnection con, object id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildSelectByIdQuery<T>(id);
             try
@@ -176,7 +179,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static async Task<T> GetByIdAsync<T>(this IDbConnection con, object id, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task<T> GetByIdAsync<T>(this IDbConnection con, object id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildSelectByIdQuery<T>(id);
 
@@ -190,7 +193,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static IEnumerable<T> Get<T>(this IDbConnection con, object filter, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static IEnumerable<T> Get<T>(this IDbConnection con, object filter, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildSelectQuery<T>(filter);
             try
@@ -203,7 +206,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static async Task<IEnumerable<T>> GetAsync<T>(this IDbConnection con, object filter, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task<IEnumerable<T>> GetAsync<T>(this IDbConnection con, object filter, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildSelectQuery<T>(filter);
             try
@@ -216,7 +219,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static void DeleteById<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static void DeleteById<T>(this IDbConnection con, T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildDeleteByIdQuery<T>();
             try
@@ -229,7 +232,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static async Task DeleteByIdAsync<T>(this IDbConnection con, T entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task DeleteByIdAsync<T>(this IDbConnection con, T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildDeleteByIdQuery<T>();
             try
@@ -242,7 +245,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static void Delete<T>(this IDbConnection con, object entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static void Delete<T>(this IDbConnection con, object entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildDeleteQuery<T>(entity);
             try
@@ -255,7 +258,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static async Task DeleteAsync<T>(this IDbConnection con, object entity, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task DeleteAsync<T>(this IDbConnection con, object entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildDeleteQuery<T>(entity);
             try
@@ -268,7 +271,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static void DeleteAll<T>(this IDbConnection con, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static void DeleteAll<T>(this IDbConnection con, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildDeleteAllQuery<T>();
             try
@@ -281,7 +284,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static async Task DeleteAllAsync<T>(this IDbConnection con, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task DeleteAllAsync<T>(this IDbConnection con, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildDeleteAllQuery<T>();
             try
@@ -294,7 +297,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static void Truncate<T>(this IDbConnection con, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static void Truncate<T>(this IDbConnection con, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildTruncateQuery<T>();
             try
@@ -307,7 +310,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static async Task TruncateAsync<T>(this IDbConnection con, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task TruncateAsync<T>(this IDbConnection con, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildTruncateQuery<T>();
             try
@@ -320,7 +323,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static int Count<T>(this IDbConnection con, object filter, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static int Count<T>(this IDbConnection con, object filter, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildCountQuery<T>(filter);
             try
@@ -333,7 +336,7 @@ namespace FastDapper.Extensions
             }
         }
 
-        public static async Task<int> CountAsync<T>(this IDbConnection con, object filter, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
+        public static async Task<int> CountAsync<T>(this IDbConnection con, object filter, IDbTransaction transaction = null, int? commandTimeout = null) where T : class, new()
         {
             var query = Builder.BuildCountQuery<T>(filter);
             try

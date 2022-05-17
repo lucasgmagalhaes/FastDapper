@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace FastDapper
@@ -34,14 +36,14 @@ namespace FastDapper
                 return members.OfType<PropertyInfo>().ToArray();
             }
 
-            if (exp is not MemberExpression member)
+            if (exp is MemberExpression member)
             {
-                throw new ArgumentException(string.Format("Expression '{0}' refers to a method, not a property.",
-                exp.ToString()));
+                ThrowIfNotProperty(member.Member, exp);
+                return new[] { (PropertyInfo)member.Member };
             }
 
-            ThrowIfNotProperty(member.Member, exp);
-            return new[] { (PropertyInfo)member.Member };
+            throw new ArgumentException(string.Format("Expression '{0}' refers to a method, not a property.",
+            exp.ToString()));
         }
 
         public static Guid GetTypeKey(Type type)
@@ -56,11 +58,17 @@ namespace FastDapper
 
         private static void ThrowIfNotProperty(MemberInfo member, Expression expression)
         {
-            if (member is not PropertyInfo)
+            if (!Is<PropertyInfo>(member))
+            {
                 throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a field, not a property.",
-                    expression.ToString()));
+                "Expression '{0}' refers to a field, not a property.",
+                expression.ToString()));
+            }
         }
 
+        internal static bool Is<T>(object val)
+        {
+            return val is T;
+        }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using FastDapper.Extensions;
-using System.Diagnostics.CodeAnalysis;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -22,7 +22,7 @@ namespace FastDapper.Mapping
         /// 
         /// </summary>
         /// <param name="keyMapper">Property of <typeparamref name="TEntity"/> to be mapped</param>
-        public void Column([NotNull] Expression<Func<TEntity, object>> keyMapper)
+        public void Column(Expression<Func<TEntity, object>> keyMapper)
         {
             var property = GetPropertyInfo(keyMapper);
             ColumnsMap.Add(property.Name, property.Name.FormatByConvetion());
@@ -79,13 +79,13 @@ namespace FastDapper.Mapping
                 exp = expression.Body;
             }
 
-            if (exp is not MemberExpression member)
+            if (!(exp is MemberExpression member))
             {
                 throw new ArgumentException(string.Format("Expression '{0}' refers to a method, not a property.",
                 expression.ToString()));
             }
 
-            if (member.Member is not PropertyInfo propInfo)
+            if (!(member.Member is PropertyInfo propInfo))
                 throw new ArgumentException(string.Format(
                     "Expression '{0}' refers to a field, not a property.",
                     expression.ToString()));

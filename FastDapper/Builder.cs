@@ -1,8 +1,10 @@
 ﻿using FastDapper.Exceptions;
 using FastDapper.Extensions;
 using FastDapper.Mapping;
-using System.Diagnostics.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -13,14 +15,15 @@ namespace FastDapper
     /// </summary>
     internal static class Builder
     {
-        private static readonly Cache _cache = new();
+        private static readonly Cache _cache = new Cache();
+        private static readonly string COMMA = ",";
 
         /// <summary>
         /// Builds insert query
         /// </summary>
         internal static string BuildInsertStatement<T>() where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -33,7 +36,7 @@ namespace FastDapper
             {
                 var fields = string.Join(", ", mapper.ColumnsMap.Select(x => $"\"{x.Value}\""));
                 var values = string.Join(", ", mapper.ColumnsMap.Select(x => $"@{x.Key}"));
-                query = $"INSERT INTO {mapper.GetFormattedTableName()} ({fields}) VALUES ({values})";
+                query = $"insert into {mapper.GetFormattedTableName()} ({fields}) values ({values})";
                 return _cache.AddQuery<T>(query, QueryType.Insert);
             }
             return query;
@@ -49,7 +52,7 @@ namespace FastDapper
         /// <param name="useCache">Testing only</param>
         /// <returns></returns>
         /// <exception cref="SqlBuildingException"></exception>
-        internal static string BuildUpsertStatement<T>(int count, bool update, Expression<Func<T, object>>? conflictKeys = null, bool useCache = true) where T : class, new()
+        internal static string BuildUpsertStatement<T>(int count, bool update, Expression<Func<T, object>> conflictKeys = null, bool useCache = true) where T : class, new()
         {
             var mapper = FastManager.Get<T>();
 
@@ -60,7 +63,7 @@ namespace FastDapper
 
             var cache = _cache.GetUpsertCache<T>();
 
-            if (cache is not null && useCache)
+            if (cache != null && useCache)
             {
                 return BuildFromCache(count, update, conflictKeys, mapper, cache);
             }
@@ -72,7 +75,7 @@ namespace FastDapper
 
             cache.Values = mapper.ColumnsMap.Keys.ToArray();
 
-            var builder = new StringBuilder($"INSERT INTO {mapper.GetFormattedTableName()} ({cache.FieldsFormatted}) VALUES {cache.RepeatValues(count)} ON CONFLICT ");
+            var builder = new StringBuilder($"insert into {mapper.GetFormattedTableName()} ({cache.FieldsFormatted}) values {cache.RepeatValues(count)} on conflict ");
 
             if (update && conflictKeys != null)
             {
@@ -84,7 +87,7 @@ namespace FastDapper
             }
             else
             {
-                builder.Append(" DO NOTHING ");
+                builder.Append(" do nothing ");
             }
 
             if (useCache)
@@ -96,21 +99,21 @@ namespace FastDapper
         }
 
         private static void BuildSetterAndAddToCache<T>(
-            [NotNull] MappedEntity<T> mapper,
-            [NotNull] UpsertCache cache,
+            MappedEntity<T> mapper,
+            UpsertCache cache,
             StringBuilder builder) where T : class, new()
         {
-            builder.Append(" DO UPDATE ");
-            builder.Append($"SET ");
+            builder.Append(" do update ");
+            builder.Append($"set ");
 
             var onUpdateList = new string[mapper.ColumnsMap.Count];
             var values = mapper.ColumnsMap.Select(x => x.Value).ToArray();
             for (int i = 0; i < values.Length; i++)
             {
-                onUpdateList[i] = $"{values[i]} = EXCLUDED.{values[i]}";
+                onUpdateList[i] = $"{values[i]} = excluded.{values[i]}";
             }
 
-            cache.Set = string.Join(',', onUpdateList);
+            cache.Set = string.Join(COMMA, onUpdateList);
         }
 
         private static string BuildConflictAndAddToCache<T>(Expression<Func<T, object>> conflictKeys, MappedEntity<T> mapper, UpsertCache cache) where T : class, new()
@@ -137,7 +140,7 @@ namespace FastDapper
                 }
             }
 
-            var conflict = $"({string.Join(',', mappedConflictKeys)})";
+            var conflict = $"({string.Join(COMMA, mappedConflictKeys)})";
             cache.Conflicts.Add(conflictKeys.Body.Type.GUID, conflict);
             return conflict;
         }
@@ -146,24 +149,24 @@ namespace FastDapper
             int count,
             bool update,
             Expression<Func<T, object>> conflictKeys,
-            [NotNull] MappedEntity<T> mapper,
-            [NotNull] UpsertCache cache) where T : class, new()
+            MappedEntity<T> mapper,
+            UpsertCache cache) where T : class, new()
         {
-            var queryBuilder = new StringBuilder($"INSERT INTO {mapper.GetFormattedTableName()} ({cache.FieldsFormatted}) VALUES {cache.RepeatValues(count)} ON CONFLICT ");
+            var queryBuilder = new StringBuilder($"insert into {mapper.GetFormattedTableName()} ({cache.FieldsFormatted}) values {cache.RepeatValues(count)} on conflict ");
 
             if (update)
             {
                 var conflictCache = cache.Conflicts[conflictKeys.Body.Type.GUID];
                 queryBuilder.Append(conflictCache);
 
-                queryBuilder.Append(" DO UPDATE ");
-                queryBuilder.Append($"SET ");
+                queryBuilder.Append(" do update ");
+                queryBuilder.Append($"set ");
 
                 queryBuilder.Append(cache.Set);
             }
             else
             {
-                queryBuilder.Append(" DO NOTHING");
+                queryBuilder.Append(" do nothing");
             }
             return queryBuilder.ToString();
         }
@@ -188,7 +191,7 @@ namespace FastDapper
 
         internal static string BuildDeleteByIdQuery<T>() where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -202,14 +205,14 @@ namespace FastDapper
                 return cache;
             }
 
-            var query = $"DELETE {mapper.GetFormattedTableName()} WHERE {mapper.GetPrimaryKeysForWhere()}";
+            var query = $"delete {mapper.GetFormattedTableName()} where {mapper.GetPrimaryKeysForWhere()}";
             _cache.AddQuery<T>(query, QueryType.DeleteById);
             return query;
         }
 
         internal static string BuildDeleteQuery<T>(object filter) where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -223,14 +226,14 @@ namespace FastDapper
                 return cache;
             }
 
-            var query = $"DELETE {mapper.GetFormattedTableName()} WHERE {mapper.GetWhereStatement(filter)}";
+            var query = $"delete {mapper.GetFormattedTableName()} where {mapper.GetWhereStatement(filter)}";
             _cache.AddQuery<T>(query, QueryType.Delete);
             return query;
         }
 
         internal static string BuildDeleteAllQuery<T>() where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -244,14 +247,14 @@ namespace FastDapper
                 return cache;
             }
 
-            var query = $"DELETE {mapper.GetFormattedTableName()}";
+            var query = $"delete from {mapper.GetFormattedTableName()}";
             _cache.AddQuery<T>(query, QueryType.Delete);
             return query;
         }
 
         internal static string BuildTruncateQuery<T>() where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -265,21 +268,21 @@ namespace FastDapper
                 return cache;
             }
 
-            var query = $"TRUNCATE TABLE {mapper.GetFormattedTableName()}";
+            var query = $"truncate table {mapper.GetFormattedTableName()}";
             _cache.AddQuery<T>(query, QueryType.Truncate);
             return query;
         }
 
         internal static string BuildSelectQuery<T>(object filter) where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
                 throw new SqlBuildingException("Mapper not found for " + typeof(T).Name);
             }
 
-            return BuildSelectQuery(filter, QueryType.Select, mapper.ColumnsMap, mapper);
+            return BuildSelectQuery<T>(filter, QueryType.Select, mapper.ColumnsMap, mapper);
         }
 
         private static string BuildSelectQuery<T>(object filter, QueryType queryType, Dictionary<string, string> columnPairs, MappedEntity<T> mapper) where T : class, new()
@@ -288,20 +291,23 @@ namespace FastDapper
 
             if (query == null)
             {
-                var builder = new StringBuilder($"SELECT {mapper.GetColumnsForSelect()} FROM {mapper.GetFormattedTableName()} WHERE ");
+                var builder = new StringBuilder($"select {mapper.GetColumnsForSelect()} from {mapper.GetFormattedTableName()} where ");
                 if (filter.GetType().IsPrimitive)
                 {
-                    foreach (var (prop, column) in columnPairs.Where(v => v.Key == filter.GetType().Name))
+                    foreach (var columnKey in columnPairs.Where(v => v.Key == filter.GetType().Name))
                     {
-                        builder.Append($"{column}=@{prop},");
+                        // column | key
+                        builder.Append($"{columnKey.Key}=@{columnKey.Value},");
                     }
                 }
                 else
                 {
                     var props = filter.GetType().GetProperties().Select(p => p.Name);
-                    foreach (var (prop, column) in columnPairs.Where(v => props.Contains(v.Key)))
+
+                    foreach (var propAndColumn in columnPairs.Where(v => props.Contains(v.Key)))
                     {
-                        builder.Append($"{column}=@{prop},");
+                        // prop | column
+                        builder.Append($"{propAndColumn.Value}=@{propAndColumn.Key},");
                     }
                 }
 
@@ -316,7 +322,7 @@ namespace FastDapper
 
         internal static string BuildSelectQuery<T>() where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -327,10 +333,10 @@ namespace FastDapper
 
             if (query == null)
             {
-                var builder = new StringBuilder($"SELECT * FROM {mapper.GetFormattedTableName()} WHERE ");
-                foreach (var (prop, column) in mapper.ColumnsMap)
+                var builder = new StringBuilder($"select * from {mapper.GetFormattedTableName()} where ");
+                foreach (var propAndColumn in mapper.ColumnsMap)
                 {
-                    builder.Append($"{column}=@{prop},");
+                    builder.Append($"{propAndColumn.Value}=@{propAndColumn.Key},");
                 }
 
                 builder.Remove(builder.Length - 1, 1);
@@ -350,7 +356,7 @@ namespace FastDapper
         /// <exception cref="SqlBuildingException"></exception>
         internal static string BuildUpdateStatement<T>() where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -361,22 +367,22 @@ namespace FastDapper
 
             if (query == null)
             {
-                var updateQuery = new StringBuilder($"UPDATE {mapper.GetFormattedTableName()} SET ");
-                foreach (var (prop, column) in mapper.ColumnsMap)
+                var updateQuery = new StringBuilder($"update {mapper.GetFormattedTableName()} set ");
+                foreach (var propAndColumn in mapper.ColumnsMap)
                 {
-                    updateQuery.Append($"{column}=@{prop},");
+                    updateQuery.Append($"{propAndColumn.Value}=@{propAndColumn.Key},");
                 }
 
                 updateQuery.Remove(updateQuery.Length - 1, 1);
-                updateQuery.Append($" WHERE {mapper.KeyMap?.FirstOrDefault().Value}=@{mapper.KeyMap.FirstOrDefault().Key}");
+                updateQuery.Append($" where {mapper.KeyMap?.FirstOrDefault().Value}=@{mapper.KeyMap.FirstOrDefault().Key}");
                 return _cache.AddQuery<T>(updateQuery.ToString(), QueryType.Update);
             }
             return query;
         }
 
-        internal static string BuildCountQuery<T>(object? filter = null) where T : class, new()
+        internal static string BuildCountQuery<T>(object filter = null) where T : class, new()
         {
-            var mapper = FastManager.Get<T>();
+            var mapper = FastManager.GetOrAdd<T>();
 
             if (mapper == null)
             {
@@ -392,11 +398,11 @@ namespace FastDapper
 
             if (filter != null)
             {
-                query = $"SELECT COUNT(1) FROM {mapper.GetFormattedTableName()} WHERE {mapper.GetWhereStatement(filter)}";
+                query = $"select count(1) from {mapper.GetFormattedTableName()} where {mapper.GetWhereStatement(filter)}";
             }
             else
             {
-                query = $"SELECT COUNT(1) FROM {mapper.GetFormattedTableName()}";
+                query = $"select count(1) from {mapper.GetFormattedTableName()}";
             }
 
             _cache.AddQuery<T>(query, QueryType.Count, filter);

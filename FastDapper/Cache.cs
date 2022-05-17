@@ -1,13 +1,16 @@
-﻿namespace FastDapper
+﻿using System;
+using System.Collections.Generic;
+
+namespace FastDapper
 {
     internal class Cache
     {
-        private readonly Dictionary<Guid, EntityQuery> _cache = new();
+        private readonly Dictionary<Guid, EntityQuery> _cache = new Dictionary<Guid, EntityQuery>();
 
-        public string AddQuery<T>(string query, QueryType queryType, object? filter = null)
+        public string AddQuery<T>(string query, QueryType queryType, object filter = null)
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var queryCache = _cache.GetValueOrDefault(key);
+            var queryCache = _cache[key];
             if (queryCache == null)
             {
                 queryCache = new EntityQuery();
@@ -33,7 +36,7 @@
             {
                 if (queryCache.Select == null)
                 {
-                    queryCache.Select = new QueryParameter(query, filter?.GetType().GUID);
+                    queryCache.Select = new QueryParameter(query, filter.GetType().GUID);
                 }
                 else
                 {
@@ -46,7 +49,7 @@
             {
                 if (queryCache.SelectById == null)
                 {
-                    queryCache.SelectById = new QueryParameter(query, filter?.GetType().GUID);
+                    queryCache.SelectById = new QueryParameter(query, filter.GetType().GUID);
                 }
                 else
                 {
@@ -58,10 +61,10 @@
             return query;
         }
 
-        public string? GetQuery<T>(QueryType queryType, object? filter = null)
+        public string GetQuery<T>(QueryType queryType, object filter = null)
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var queryCache = _cache.GetValueOrDefault(key);
+            var queryCache = _cache[key];
 
             if (queryCache == null)
             {
@@ -99,7 +102,7 @@
         public UpsertCache AddUpsertCache<T>(UpsertCache cache)
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = _cache.GetValueOrDefault(key);
+            var query = _cache[key];
             if (query == null)
             {
                 _cache.Add(key, new EntityQuery { Upsert = cache });
@@ -112,7 +115,7 @@
         public UpsertCache GetUpsertCache<T>()
         {
             var key = Utils.GetTypeKey(typeof(T));
-            var query = _cache.GetValueOrDefault(key);
+            var query = _cache[key];
             if (query == null)
             {
                 return null;

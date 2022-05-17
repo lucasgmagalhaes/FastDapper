@@ -1,15 +1,17 @@
-﻿namespace FastDapper
+﻿using System;
+
+namespace FastDapper
 {
     internal class QueryParameter
     {
-        internal string? Query { get; set; }
-        internal Guid? FilterKey { get; private set; }
+        internal string Query { get; set; }
+        internal Guid FilterKey { get; private set; }
 
         internal QueryParameter()
         {
         }
 
-        internal QueryParameter(string query, Guid? parameterKey)
+        internal QueryParameter(string query, Guid parameterKey)
         {
             Query = query;
             FilterKey = parameterKey;
@@ -22,17 +24,12 @@
 
         internal bool IsEqual(object filter)
         {
-            if (FilterKey == null && filter == null)
+            if (Guid.Empty == FilterKey)
             {
                 return true;
             }
 
-            if (FilterKey != null)
-            {
-                return FilterKey.Equals(filter.GetType().GUID);
-            }
-
-            return false;
+            return FilterKey.Equals(filter.GetType().GUID);
         }
     }
 }

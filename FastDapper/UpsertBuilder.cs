@@ -1,8 +1,12 @@
 ﻿using Dapper;
 using FastDapper.Exceptions;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace FastDapper
 {
@@ -13,7 +17,7 @@ namespace FastDapper
     public class UpsertBuilder<TEntity> where TEntity : class, new()
     {
         private bool _update = true;
-        private Expression<Func<TEntity, object>>? _conflitctKeys;
+        private Expression<Func<TEntity, object>> _conflitctKeys;
         private readonly IDbConnection _con;
         private readonly TEntity[] _entries;
 

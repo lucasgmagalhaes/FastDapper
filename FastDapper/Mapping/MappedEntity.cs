@@ -1,5 +1,6 @@
 ﻿using FastDapper.Exceptions;
-using System.Diagnostics.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace FastDapper.Mapping
@@ -13,7 +14,7 @@ namespace FastDapper.Mapping
         internal Dictionary<string, string> KeyMap { get; set; }
         internal Dictionary<string, string> ColumnsMap { get; set; }
         internal string TableName { get; set; }
-        internal string? SchemaName { get; set; }
+        internal string SchemaName { get; set; }
 
         /// <summary>
         /// Initialize the entity mappings
@@ -31,7 +32,7 @@ namespace FastDapper.Mapping
         /// <param name="property">Object's property with the primery key</param>
         /// <param name="column">Column in database. (This operation do not apply the naming specification</param>
         /// <exception cref="ArgumentNullException">If <paramref name="property"/> or <paramref name="column"/> be null or empty</exception>
-        public void PrimaryKey([NotNull] string property, [NotNull] string column)
+        public void PrimaryKey(string property, string column)
         {
             if (string.IsNullOrEmpty(property))
             {
@@ -52,7 +53,7 @@ namespace FastDapper.Mapping
         /// <param name="property">Entity's property</param>
         /// <param name="column">Entity's table column</param>
         /// <exception cref="ArgumentNullException">If <paramref name="property"/> or <paramref name="column"/> be null or empty</exception>
-        public void Column([NotNull] string property, [NotNull] string column)
+        public void Column(string property, string column)
         {
             if (string.IsNullOrEmpty(property))
             {
@@ -73,7 +74,7 @@ namespace FastDapper.Mapping
         /// <param name="name">Name of the table</param>
         /// <param name="schema">Schame of the table</param>
         /// <exception cref="ArgumentNullException">If <paramref name="name"/> is null or empty</exception>
-        public void Table([NotNull] string name, string? schema = null)
+        public void Table(string name, string schema = null)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -87,9 +88,9 @@ namespace FastDapper.Mapping
         internal string GetColumnsForSelect()
         {
             var sb = new StringBuilder();
-            foreach (var (prop, column) in ColumnsMap)
+            foreach (var propColumn in ColumnsMap)
             {
-                sb.Append($"{column} as {prop}");
+                sb.Append($"{propColumn.Value} as {propColumn.Key}");
             }
             return sb.ToString();
         }
@@ -97,27 +98,28 @@ namespace FastDapper.Mapping
         internal string GetPrimaryKeysForWhere()
         {
             var sb = new StringBuilder();
-            foreach (var (prop, column) in KeyMap)
+            foreach (var propColumn in KeyMap)
             {
-                sb.Append($"{column} = @{prop}");
+                sb.Append($"{propColumn.Value} = @{propColumn.Key}");
             }
             return sb.ToString();
         }
 
         internal string GetWhereStatement(object filter)
         {
-            var sb = new StringBuilder();
-            foreach (var prop in filter.GetType().GetProperties())
+            var props = filter.GetType().GetProperties();
+            var _params = new string[props.Length];
+            for (int i = 0; i < props.Length; i++)
             {
-                var colName = GetColumnName(prop.Name);
-                sb.Append($"{colName} = @{prop.Name}");
+                var colName = GetColumnName(props[i].Name);
+                _params[i] = $"{colName} = @{props[i].Name}";
             }
-            return sb.ToString();
+            return string.Join(" and ", _params);
         }
 
         private string GetColumnName(string key)
         {
-            return KeyMap.GetValueOrDefault(key) ?? ColumnsMap.GetValueOrDefault(key) ?? key;
+            return KeyMap[key] ?? ColumnsMap[key] ?? key;
         }
 
         internal string GetFormattedTableName()

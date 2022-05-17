@@ -1,32 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPublishable>True</IsPublishable>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <PackageProjectUrl>https://github.com/lucasgmagalhaes/FastDapper</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/lucasgmagalhaes/FastDapper</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageLicenseFile></PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>dapper;crud</PackageTags>
-    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net461;net6.0</TargetFrameworks>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<IsPublishable>True</IsPublishable>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<PackageProjectUrl>https://github.com/lucasgmagalhaes/FastDapper</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/lucasgmagalhaes/FastDapper</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseFile></PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageTags>dapper;crud</PackageTags>
+		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.123" />
-    <PackageReference Include="Moq.Dapper" Version="1.0.4" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.0.123" />
+	</ItemGroup>
 
 </Project>

@@ -1,4 +1,6 @@
-﻿namespace FastDapper.Attributes
+﻿using System;
+
+namespace FastDapper.Attributes
 {
     /// <summary>
     /// Defines a primary key of some entity

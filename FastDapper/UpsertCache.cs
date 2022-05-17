@@ -1,13 +1,15 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Linq;
 
 namespace FastDapper
 {
     internal class UpsertCache
     {
-        public string? FieldsFormatted { get; set; }
+        public string FieldsFormatted { get; set; }
         public string[] Values { get; set; }
         public Hashtable Conflicts { get; set; }
-        public string? Set { get; set; }
+        public string Set { get; set; }
 
         public UpsertCache()
         {

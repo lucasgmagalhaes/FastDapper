@@ -1,4 +1,6 @@
-﻿namespace FastDapper.Attributes
+﻿using System;
+
+namespace FastDapper.Attributes
 {
     /// <summary>
     /// Denotes an entitie's property that should me ignored in mapping

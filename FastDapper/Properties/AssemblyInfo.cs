@@ -18,4 +18,4 @@ using System.Runtime.InteropServices;
 [assembly: Guid("f37987b9-6cff-423e-b0e3-d452cae22267")]
 [assembly: InternalsVisibleTo("FastDapper.Test")]
 [assembly: InternalsVisibleTo("Benchmark")]
-[assembly: InternalsVisibleTo("Benchmark.Caching")]
+[assembly: InternalsVisibleTo("Benchmark.Caching")] 

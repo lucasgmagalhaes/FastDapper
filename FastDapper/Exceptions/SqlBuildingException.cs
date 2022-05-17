@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 
 namespace FastDapper.Exceptions
@@ -21,7 +22,7 @@ namespace FastDapper.Exceptions
         /// Initialize a new instance of <see cref="SqlBuildingException"/> with a message
         /// </summary>
         /// <param name="message"></param>
-        public SqlBuildingException(string? message) : base(message)
+        public SqlBuildingException(string message) : base(message)
         {
         }
 
@@ -30,7 +31,7 @@ namespace FastDapper.Exceptions
         /// </summary>
         /// <param name="message">Error message</param>
         /// <param name="innerException">Inner exception</param>
-        public SqlBuildingException(string? message, Exception? innerException) : base(message, innerException)
+        public SqlBuildingException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
